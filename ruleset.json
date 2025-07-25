@@ -1,0 +1,7 @@
+{
+  "query": "mutation($repositoryId:ID!, $pattern:String!) { createBranchProtectionRule(input:{ repositoryId:$repositoryId, pattern:$pattern, requiresApprovingReviews:true, requiredApprovingReviewCount:1, requiresStatusChecks:true, allowsForcePushes:false, allowsDeletions:false, requiresConversationResolution:true }) { branchProtectionRule { id pattern } } }",
+  "variables": {
+    "repositoryId": "R_kgDOO-Aoew",
+    "pattern": "*"
+  }
+}
