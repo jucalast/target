@@ -1,3 +1,7 @@
+# Servidor ASGI para FastAPI
+uvicorn
+# Segurança de senhas
+passlib[bcrypt]
 fastapi
 uvicorn
 sqlalchemy

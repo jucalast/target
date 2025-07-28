@@ -1,7 +1,6 @@
 {
-  "query": "mutation($repositoryId:ID!, $pattern:String!) { createBranchProtectionRule(input:{ repositoryId:$repositoryId, pattern:$pattern, requiresApprovingReviews:true, requiredApprovingReviewCount:1, requiresStatusChecks:true, allowsForcePushes:false, allowsDeletions:false, requiresConversationResolution:true }) { branchProtectionRule { id pattern } } }",
+  "query": "mutation($ruleId:ID!) { updateBranchProtectionRule(input:{ branchProtectionRuleId:$ruleId, requiresApprovingReviews:false }) { branchProtectionRule { id } } }",
   "variables": {
-    "repositoryId": "R_kgDOO-Aoew",
-    "pattern": "*"
+    "ruleId": "BPR_kwDOO-Aoe84D6YK2"
   }
 }

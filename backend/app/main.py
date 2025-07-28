@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.api.endpoints import users, analysis
 
 app = FastAPI(
@@ -8,8 +9,14 @@ app = FastAPI(
 )
 
 # Incluir os roteadores dos diferentes módulos
-app.include_router(users.router, prefix="/api/v1")
-app.include_router(analysis.router, prefix="/api/v1")
+
+# Inclui o roteador de usuários na aplicação principal.
+# Todas as rotas definidas em 'users.router' serão prefixadas com '/api/v1/users'.
+# Por exemplo, a rota "/" em users.py se torna "/api/v1/users/".
+app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+
+# Inclui o roteador de análises (exemplo para futuras implementações).
+app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["Analysis"])
 
 @app.get("/")
 def read_root():
