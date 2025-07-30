@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints import users, login
 from app.api.endpoints import analysis as analysis_api
+from app.api.endpoints import ibge as ibge_api
 from app.db.database import Base, engine
 from app.models import user, analysis
 
@@ -45,6 +46,9 @@ app.include_router(analysis_api.router, prefix="/api/v1/analysis", tags=["Analys
 
 # Inclui o roteador de login.
 app.include_router(login.router, prefix="/api/v1/login", tags=["Login"])
+
+# Inclui o roteador de dados do IBGE
+app.include_router(ibge_api.router, prefix="/api/v1/ibge", tags=["IBGE Data"])
 
 @app.get("/")
 def read_root():
