@@ -1,20 +1,12 @@
-from sqlalchemy import Column, Integer, String
-from app.db.database import Base
-
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
 # backend/app/models/user.py
 
 from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
-# ============================================================================== 
+# ==============================================================================
 # Modelo SQLAlchemy para a Entidade User
-# ============================================================================== 
+# ==============================================================================
 
 class User(Base):
     """
@@ -47,3 +39,9 @@ class User(Base):
     # do registro. Isso garante a consistência e a integridade do dado,
     # pois a data é gerada pelo servidor do banco de dados, e não pela aplicação.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Define a relação um-para-muitos com o modelo Analysis.
+    # 'back_populates' cria a referência bidirecional entre os modelos.
+    # 'cascade' garante que, ao deletar um usuário, todas as suas análises
+    # associadas também sejam deletadas.
+    analyses = relationship("Analysis", back_populates="owner", cascade="all, delete-orphan")

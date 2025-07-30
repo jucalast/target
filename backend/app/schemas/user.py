@@ -1,24 +1,11 @@
-from pydantic import BaseModel
-
-class UserBase(BaseModel):
-    name: str
-    email: str
-
-class UserCreate(UserBase):
-    password: str
-
-class UserRead(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
+# backend/app/schemas/user.py
 
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
-# ============================================================================== 
+# ==============================================================================
 # Schema Base
-# ============================================================================== 
+# ==============================================================================
 
 class UserBase(BaseModel):
     """
@@ -28,9 +15,9 @@ class UserBase(BaseModel):
     """
     email: EmailStr  # Utiliza EmailStr para validação automática do formato do e-mail.
 
-# ============================================================================== 
+# ==============================================================================
 # Schema para Criação de Usuário
-# ============================================================================== 
+# ==============================================================================
 
 class UserCreate(UserBase):
     """
@@ -41,9 +28,9 @@ class UserCreate(UserBase):
     """
     password: str
 
-# ============================================================================== 
+# ==============================================================================
 # Schema para Leitura de Usuário (Resposta da API)
-# ============================================================================== 
+# ==============================================================================
 
 class UserRead(UserBase):
     """
