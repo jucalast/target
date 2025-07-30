@@ -1,1 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
 .venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local development
+.DS_Store
+Thumbs.db
+
+# Test files
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Local development
+*.sqlite3
+*.db
+*.sql
+
+# Python packaging
+*.manifest
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development
+local_settings.py
+db.sqlite3
+
+# Node modules (if any)
+node_modules/
+
+# Build files
+build/
+dist/
+
+# Cache
+.cache/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Project specific
+/test_cache_integration/
+test_mappings.json

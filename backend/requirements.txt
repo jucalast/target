@@ -1,10 +1,27 @@
-# Servidor ASGI para FastAPI
-uvicorn
-# Segurança de senhas
-passlib[bcrypt]
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-python-dotenv
-pytest
+# Dependências principais
+fastapi>=0.103.0,<0.112.0
+uvicorn>=0.23.0,<0.24.0
+SQLAlchemy>=2.0.0,<2.1.0
+pydantic>=2.0.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+alembic>=1.11.0,<2.0.0
+passlib[bcrypt]>=1.7.4,<2.0.0
+python-jose[cryptography]>=3.3.0,<4.0.0
+email-validator>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0,<3.0.0
+spacy[transformers]>=3.6.0,<3.8.0  # Versão compatível com typer<0.10.0
+sentence-transformers>=2.2.0,<3.0.0
+
+# Dependências para integração com IBGE
+pandas>=2.0.0,<3.0.0
+sidrapy>=0.1.4,<0.2.0  # Limitar a versão para evitar atualizações quebradas
+tenacity>=8.2.3,<9.0.0
+python-rapidjson>=1.10.0,<2.0.0
+pyarrow>=12.0.0,<13.0.0  # Para cache em parquet
+requests>=2.31.0,<3.0.0
+
+# Dependências para testes
+pytest>=7.0.0,<8.0.0
+pytest-asyncio>=0.20.0,<0.21.0
+httpx>=0.24.0,<0.25.0  # Cliente HTTP assíncrono para testes
+unidecode>=1.4.0,<2.0.0
