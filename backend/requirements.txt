@@ -19,6 +19,10 @@ tenacity>=8.2.3,<9.0.0
 python-rapidjson>=1.10.0,<2.0.0
 pyarrow>=12.0.0,<13.0.0  # Para cache em parquet
 requests>=2.31.0,<3.0.0
+scikit-learn>=1.3.0,<2.0.0  # Para TF-IDF e LDA
+
+# Dependências para Google Trends
+pytrends>=4.9.0,<5.0.0  # Cliente para a API do Google Trends
 
 # Dependências para testes
 pytest>=7.0.0,<8.0.0

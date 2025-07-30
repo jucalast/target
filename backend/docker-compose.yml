@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # API Gateway - Ponto de entrada principal da aplicação
+  api_gateway:
+    build:
+      context: .
+      dockerfile: api_gateway/Dockerfile
+    container_name: api_gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./sql_app.db}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+    volumes:
+      - ./api_gateway:/app
+      - ./shared:/app/shared
+    depends_on:
+      - db
+    networks:
+      - backend-network
+
+  # Serviço de Processamento de Linguagem Natural
+  nlp_processor:
+    build:
+      context: .
+      dockerfile: nlp_processor/Dockerfile
+    container_name: nlp_processor
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - MODEL_NAME=${NLP_MODEL_NAME:-sentence-transformers/all-MiniLM-L6-v2}
+    volumes:
+      - ./nlp_processor:/app
+      - ./shared:/app/shared
+    networks:
+      - backend-network
+
+  # Pipeline ETL para processamento de dados
+  etl_pipeline:
+    build:
+      context: .
+      dockerfile: etl_pipeline/Dockerfile
+    container_name: etl_pipeline
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - CACHE_DIR=/app/cache
+    volumes:
+      - ./etl_pipeline:/app
+      - ./shared:/app/shared
+      - etl_cache:/app/cache
+    networks:
+      - backend-network
+
+  # Banco de dados PostgreSQL
+  db:
+    image: postgres:13-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-market_analysis}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+  # PGAdmin para gerenciamento do banco de dados (opcional)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - backend-network
+
+# Redes
+networks:
+  backend-network:
+    driver: bridge
+
+# Volumes para persistência de dados
+volumes:
+  postgres_data:
+  etl_cache:

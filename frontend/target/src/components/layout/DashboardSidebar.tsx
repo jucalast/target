@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import SidebarItem from "./analysis/SidebarItem";
+import SidebarItem from "./SidebarItem";
 
 import { FaHome, FaChartBar, FaPlusCircle, FaUser } from "react-icons/fa";
 
