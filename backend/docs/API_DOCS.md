@@ -4,7 +4,7 @@ This document provides comprehensive documentation for the Market Analysis API, 
 
 ## Base URL
 
-```
+``` 
 https://api.marketanalysis.example.com/v1
 ```
 
