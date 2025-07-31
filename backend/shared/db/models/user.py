@@ -27,7 +27,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
     analyses = relationship("Analysis", back_populates="owner", cascade="all, delete-orphan")
