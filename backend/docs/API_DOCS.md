@@ -7,7 +7,7 @@ This document provides comprehensive documentation for the Market Analysis API, 
 ``` 
 https://api.marketanalysis.example.com/v1
 ```
-
+ 
 ## Authentication
 
 All endpoints require API key authentication. Include your API key in the `X-API-Key` header.
