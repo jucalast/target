@@ -4,7 +4,7 @@ services:
   # API Gateway - Main entry point
   api_gateway:
     build:
-      context: .
+      context: ./backend
       dockerfile: api_gateway/Dockerfile
     container_name: api_gateway
     restart: always
@@ -31,7 +31,7 @@ services:
   # NLP Service
   nlp_processor:
     build:
-      context: .
+      context: ./backend
       dockerfile: nlp_processor/Dockerfile
     container_name: nlp_processor
     restart: always
