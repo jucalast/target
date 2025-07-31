@@ -1,4 +1,6 @@
+
 """Tests for the Market Analysis Service."""
+
 import pytest
 from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session

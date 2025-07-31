@@ -13,7 +13,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
+
 from sqlalchemy.engine.reflection import Inspector
+
 import logging
 
 from shared.utils.config import settings
@@ -130,7 +132,9 @@ class PostgreSQLConnection:
     def get_table_names(self) -> list:
         """Retorna uma lista com os nomes de todas as tabelas no banco de dados."""
         try:
+
             return Inspector.from_engine(self.engine).get_table_names()
+
         except Exception as e:
             logger.error(f"Erro ao listar tabelas do banco de dados: {str(e)}")
             return []

@@ -5,6 +5,7 @@ Este módulo fornece uma interface de alto nível para acessar os dados do IBGE
 através da API SIDRA, com suporte a cache, novas tentativas automáticas e uma
 camada de serviço para consultas semânticas (ex: por conceito de negócio).
 """
+
 from pydantic import ValidationError
 import hashlib
 import json
