@@ -9,9 +9,8 @@ from typing import List, Dict, Optional, Any
 from enum import Enum
 from pydantic import BaseModel, Field, HttpUrl, validator
 
-
 class NewsSourceType(str, Enum):
-    """Tipos de fontes de notícias suportadas."""
+"""Tipos de fontes de notícias suportadas."""
     NEWSPAPER = "newspaper"
     MAGAZINE = "magazine"
     NEWS_AGENCY = "news_agency"
@@ -20,7 +19,7 @@ class NewsSourceType(str, Enum):
     OTHER = "other"
 
 class NewsCategory(str, Enum):
-    """Categorias de notícias suportadas."""
+"""Categorias de notícias suportadas."""
     POLITICS = "politics"
     ECONOMY = "economy"
     BUSINESS = "business"
@@ -36,7 +35,7 @@ class NewsCategory(str, Enum):
     GENERAL = "general"
 
 class NewsSource(BaseModel):
-    """Representa uma fonte de notícias."""
+"""Representa uma fonte de notícias."""
     id: Optional[str] = Field(
         None,
         description="Identificador único da fonte de notícias"
@@ -80,23 +79,23 @@ class NewsSource(BaseModel):
     )
 
     class Config:
-        schema_extra = {
-            "example": {
-                "id": "agenciabrasil",
-                "name": "Agência Brasil",
-                "domain": "agenciabrasil.ebc.com.br",
-                "url": "https://agenciabrasil.ebc.com.br",
-                "type": "news_agency",
-                "language": "pt-BR",
-                "country": "BR",
-                "description": "Agência pública de notícias do Brasil",
-                "logo_url": "https://agenciabrasil.ebc.com.br/static/logo-\
+    schema_extra = {
+    "example": {
+    "id": "agenciabrasil",
+    "name": "Agência Brasil",
+    "domain": "agenciabrasil.ebc.com.br",
+    "url": "https://agenciabrasil.ebc.com.br",
+    "type": "news_agency",
+    "language": "pt-BR",
+    "country": "BR",
+    "description": "Agência pública de notícias do Brasil",
+    "logo_url": "https://agenciabrasil.ebc.com.br/static/logo-\
                     abr.png"
             }
         }
 
 class NewsArticle(BaseModel):
-    """Representa um artigo de notícia."""
+"""Representa um artigo de notícia."""
     id: Optional[str] = Field(
         None,
         description="Identificador único do artigo"
@@ -159,7 +158,7 @@ class NewsArticle(BaseModel):
     )
     entities: List[Dict[str, Any]] = Field(
         default_factory=list,
-        description="Entidades nomeadas extraídas do texto (pessoas,\
+        description="Entidades nomeadas extraídas do texto (pessoas, \
             organizações, locais, etc.)"
     )
     metadata: Dict[str, Any] = Field(
@@ -176,16 +175,16 @@ class NewsArticle(BaseModel):
     )
 
     class Config:
-        schema_extra = {
-            "example": {
-                "title": "IBGE prevê safra recorde de grãos em 2023",
-                "content": "O Instituto Brasileiro de Geografia e Estatística (IBGE) divulgou...",
-                "url": "https://agenciabrasil.ebc.com.br/economia/noticia/2023-01/ibge-preve-safra-recorde-graos-2023",
-                "source": {
-                    "name": "Agência Brasil",
-                    "domain": "agenciabrasil.ebc.com.br",
-                    "url": "https://agenciabrasil.ebc.com.br",
-                    "type": "news_agency"
+    schema_extra = {
+    "example": {
+    "title": "IBGE prevê safra recorde de grãos em 2023",
+    "content": "O Instituto Brasileiro de Geografia e Estatística (IBGE) divulgou...",
+    "url": "https://agenciabrasil.ebc.com.br/economia/noticia/2023-01/ibge-preve-safra-recorde-graos-2023",
+    "source": {
+    "name": "Agência Brasil",
+    "domain": "agenciabrasil.ebc.com.br",
+    "url": "https://agenciabrasil.ebc.com.br",
+    "type": "news_agency"
                 },
                 "published_at": "2023-01-15T10:30:00-03:00",
                 "author": "Repórter da Agência Brasil",
@@ -193,10 +192,10 @@ class NewsArticle(BaseModel):
                 "categories": ["economy", "agriculture", "ibge"],
                 "language": "pt-BR",
                 "search_query": "previsão safra grãos 2023",
-                "keywords": ["IBGE", "safra recorde", "grãos", "agricultura",\
+                "keywords": ["IBGE", "safra recorde", "grãos", "agricultura", \
                     "previsão"],
-                "sentiment_score": 0.75,
-                "metadata": {
+                    "sentiment_score": 0.75,
+                    "metadata": {
                     "word_count": 450,
                     "extracted_at": "2023-01-15T11:05:23Z",
                     "has_image": True,
@@ -208,14 +207,14 @@ class NewsArticle(BaseModel):
     @validator('categories', pre=True, always=True)
 
     def set_categories(cls, v, values):
-        """Garante que a categoria principal esteja na lista de categorias."""
+    """Garante que a categoria principal esteja na lista de categorias."""
         if 'category' in values and values['category'] and \
             values['category'] not in v:
             return [values['category']] + v
         return v or []
 
 class NewsSearchResult(BaseModel):
-    """Resultado de uma busca por notícias."""
+"""Resultado de uma busca por notícias."""
     query: str = Field(
         ...,
         description="Termo de busca original"
@@ -242,18 +241,18 @@ class NewsSearchResult(BaseModel):
     )
 
     class Config:
-        schema_extra = {
-            "example": {
-                "query": "economia brasileira",
-                "total_results": 124,
-                "page": 1,
-                "page_size": 10,
-                "articles": [],  # Lista de NewsArticle
-                "facets": {
-                    "source": {"Agência Brasil": 45, "IBGE": 32,\
+    schema_extra = {
+    "example": {
+    "query": "economia brasileira",
+    "total_results": 124,
+    "page": 1,
+    "page_size": 10,
+    "articles": [],
+    "facets": {
+    "source": {"Agência Brasil": 45, "IBGE": 32, \
                         "Governo Federal": 47},
-                    "category": {"economy": 85, "politics": 23, "business": 16},\
-                    "published_at": {"2023-01": 45, "2022-12": 56,\
+                        "category": {"economy": 85, "politics": 23, "business": 16}, \
+                    "published_at": {"2023-01": 45, "2022-12": 56, \
                         "2022-11": 23}
                 }
             }

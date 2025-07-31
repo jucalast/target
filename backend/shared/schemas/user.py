@@ -1,38 +1,25 @@
-# backend/app/schemas/user.py
-
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
-# ==============================================================================
-# Schema Base
-# ==============================================================================
-
-
 class UserBase(BaseModel):
-    """
+"""
     Schema base para a entidade User.
     Contém os campos que são comuns a todos os outros schemas de usuário.
     Isso evita a repetição de código (princípio DRY).
     """
-    email: EmailStr  # Utiliza EmailStr para validação automática do formato do e-mail.
-# ==============================================================================
-# Schema para Criação de Usuário
-# ==============================================================================
+    email: EmailStr
 
 class UserCreate(UserBase):
-    """
+"""
     Schema usado para criar um novo usuário.
     Herda o campo 'email' de UserBase e adiciona o campo 'password'.
     Este é o modelo de dados que a API esperará receber no corpo da requisição
     para o endpoint de criação de usuário.
     """
     password: str
-# ==============================================================================
-# Schema para Leitura de Usuário (Resposta da API)
-# ==============================================================================
 
 class UserRead(UserBase):
-    """
+"""
     Schema usado para retornar os dados de um usuário pela API.
     Herda o campo 'email' de UserBase e adiciona os campos que são seguros
     para serem expostos ao cliente.
@@ -43,7 +30,7 @@ class UserRead(UserBase):
     created_at: datetime
 
     class Config:
-        """
+    """
         Configuração do Pydantic para o schema.
         'from_attributes = True' (\
             anteriormente 'orm_mode = True') permite que o

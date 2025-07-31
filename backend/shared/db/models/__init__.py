@@ -4,7 +4,9 @@ Módulo de modelos do banco de dados.
 Este pacote contém todos os modelos SQLAlchemy usados na aplicação.
 """
 
-
+from .analysis import Analysis
+from .analysis_request import AnalysisRequest
+from .etl_models import (
     ETLResultModel,
     MarketSegmentModel,
     MarketMetricModel,
@@ -15,8 +17,8 @@ Este pacote contém todos os modelos SQLAlchemy usados na aplicação.
     DataSource,
     DataQualityLevel
 )
+from .user import User
 
-# Exporta todos os modelos para facilitar as importações
 __all__ = [
     'User',
     'Analysis',

@@ -1,16 +1,14 @@
 from pydantic import BaseModel
 
-
 class AnalysisRequestBase(BaseModel):
-    description: str
+description: str
     status: str
 
 class AnalysisRequestCreate(AnalysisRequestBase):
-    pass
-
+pass
 
 class AnalysisRequestRead(AnalysisRequestBase):
-    id: int
+id: int
 
     class Config:
-        orm_mode = True
+    orm_mode = True
