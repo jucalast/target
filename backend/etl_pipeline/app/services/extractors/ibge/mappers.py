@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # --- Estruturas de Dados e Constantes ---
 
+
 class Location(TypedDict):
     """
     Representa uma localização com seu código e nível territorial no padrão IBGE.
@@ -86,13 +87,15 @@ UF_IBGE_CODES = {
     'SP': '35', 'SE': '28', 'TO': '17'
 }
 
+
 class SIDRAMapper:
     """
     Mapeia conceitos de negócio e localidades para códigos da API SIDRA do IBGE.
-    
+
     Esta classe facilita a consulta à API SIDRA ao permitir o uso de termos
     comuns (ex: 'sudeste', 'população jovem') em vez de códigos numéricos.
     """
+
 
     def __init__(self, mapping_file: Optional[str] = None):
         """
@@ -113,7 +116,7 @@ class SIDRAMapper:
                 base_dir / 'app' / 'data' / 'ibge' / 'mappings' / 'sidra_mappings.json',
                 base_dir / 'app' / 'services' / 'ibge' / 'data' / 'sidra_mappings.json'
             ]
-            
+
             for path in possible_paths:
                 if path.exists():
                     mapping_file = str(path)
@@ -125,9 +128,10 @@ class SIDRAMapper:
                              ", ".join(str(p) for p in possible_paths))
                 self.mappings = {"tables": {}, "variables": {}, "classifications": {}, "concepts": {}}
                 return
-        
+
         self.mapping_file = Path(mapping_file)
         self.mappings = self._load_mappings()
+
 
     def _load_mappings(self) -> Dict[str, Any]:
         """Carrega os mapeamentos do arquivo JSON."""
@@ -135,7 +139,7 @@ class SIDRAMapper:
             if not hasattr(self, 'mapping_file'):
                 logger.warning("Nenhum arquivo de mapeamento definido. Usando mapeamento vazio.")
                 return {"tables": {}, "variables": {}, "classifications": {}, "concepts": {}}
-                
+
             with open(self.mapping_file, 'r', encoding='utf-8') as f:
                 logger.info(f"Carregando mapeamentos de: {self.mapping_file}")
                 return json.load(f)
@@ -149,30 +153,32 @@ class SIDRAMapper:
             logger.error(f"Erro inesperado ao carregar mapeamentos: {e}")
             return {"tables": {}, "variables": {}, "classifications": {}, "concepts": {}}
 
+
     def _normalize_text(self, text: str) -> str:
         """
         Normaliza uma string para facilitar a busca e a correspondência.
         Converte para minúsculas, remove acentos e caracteres não alfanuméricos.
-        
+
         Args:
             text: A string de entrada a ser normalizada.
-            
+
         Returns:
             A string normalizada.
         """
         if not text:
             return ''
-        
+
         # Converte para minúsculas e remove acentos
         normalized = unidecode(text.lower())
-        
+
         # Mantém letras, números, espaços, hífen e sublinhados. Remove outros caracteres.
         normalized = re.sub(r'[^a-z0-9\s_-]', '', normalized)
-        
+
         # Substitui múltiplos espaços por um único espaço
         normalized = re.sub(r'\s+', ' ', normalized).strip()
-        
+
         return normalized
+
 
     def get_location_info(self, location_name: str) -> Optional[Location]:
         """
@@ -193,23 +199,24 @@ class SIDRAMapper:
         # 1. Busca no mapeamento de localidades comuns
         if normalized in COMMON_LOCATIONS:
             return COMMON_LOCATIONS[normalized]
-        
+
         # 2. Verifica se é uma sigla de UF
         if len(normalized) == 2 and normalized.upper() in UF_IBGE_CODES:
             code = UF_IBGE_CODES[normalized.upper()]
             return {'code': code, 'level': '3', 'name': location_name}
-            
+
         # 3. Verifica se é um código numérico direto
         if normalized.isdigit():
             level = str(len(normalized)) if len(normalized) in [1, 2] else '6' # Heurística simples
             if len(normalized) == 1: level = '2' # Grande Região
             if len(normalized) == 2: level = '3' # UF
             if len(normalized) == 7: level = '6' # Município
-            
+
             return {'code': normalized, 'level': level, 'name': location_name}
 
         logger.warning(f"Localização não encontrada para o termo: '{location_name}'")
         return None
+
 
     def get_concept_mapping(self, concept: str) -> Dict[str, Any]:
         """
@@ -226,10 +233,11 @@ class SIDRAMapper:
         """
         normalized_concept = self._normalize_text(concept)
         mapping = self.mappings.get('concepts', {}).get(normalized_concept)
-        
+
         if not mapping:
             raise ValueError(f"Conceito '{concept}' não encontrado nos mapeamentos.")
         return mapping
+
 
     def get_variable_info(self, table_code: str, variable_name: str) -> Dict[str, Any]:
         """
@@ -247,13 +255,14 @@ class SIDRAMapper:
         """
         table_key = str(table_code)
         normalized_var = self._normalize_text(variable_name)
-        
+
         variables = self.mappings.get('variables', [])
         for var in variables:
             if var.get('table') == table_key and self._normalize_text(var.get('name')) == normalized_var:
                 return var
-                
+
         raise ValueError(f"Variável '{variable_name}' não encontrada na tabela '{table_code}'.")
+
 
     def get_table_info(self, table_code: str) -> Dict[str, Any]:
         """
@@ -273,8 +282,9 @@ class SIDRAMapper:
         for table in tables:
             if table.get('code') == table_key:
                 return table
-                
+
         raise ValueError(f"Tabela '{table_code}' não encontrada nos mapeamentos.")
+
 
     def list_available_concepts(self) -> List[str]:
         """
@@ -284,6 +294,7 @@ class SIDRAMapper:
             Uma lista de strings com os nomes dos conceitos.
         """
         return list(self.mappings.get('concepts', {}).keys())
+
 
     def list_available_tables(self) -> List[Dict[str, Any]]:
         """

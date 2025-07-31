@@ -3,6 +3,7 @@ from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+
 class Keyword(BaseModel):
     """A keyword with its relevance score."""
     keyword: str

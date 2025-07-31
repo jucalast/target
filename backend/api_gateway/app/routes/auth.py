@@ -11,6 +11,8 @@ from api_gateway.app.services import user_service
 router = APIRouter()
 
 @router.post("/token")
+
+
 def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = user_service.get_user_by_email(db, email=form_data.username)
     if not user or not verify_password(form_data.password, user.hashed_password):

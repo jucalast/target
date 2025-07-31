@@ -6,14 +6,16 @@ from typing import Dict, Any, Optional, Type, TypeVar, Generic
 # Define type variable for exception chaining
 E = TypeVar('E', bound=Exception)
 
+
 class SidraApiError(Exception, Generic[E]):
     """
     Base exception for SIDRA API integration errors.
-    
+
     This exception is raised when there's an error interacting with the SIDRA API,
     including validation errors, API errors, and data processing errors.
     """
-    
+
+
     def __init__(
         self,
         message: str,
@@ -27,26 +29,28 @@ class SidraApiError(Exception, Generic[E]):
         self.error_code = error_code or "UNKNOWN_ERROR"
         self.original_error = original_error
         self.params = params or {}
-        
+
         # Build a detailed, log-friendly error message
         full_message = message
         details = []
-        
+
         if table_code:
             details.append(f"Table: {table_code}")
-        
+
         if params:
             details.append(f"Parameters: {params}")
-            
+
         if original_error:
             details.append(f"Original error: {str(original_error)}")
-            
+
         if details:
             full_message = f"{message} ({'; '.join(details)})"
-            
+
         super().__init__(full_message)
-    
+
     @classmethod
+
+
     def from_exception(
         cls: Type['SidraApiError'],
         exc: Exception,
@@ -54,12 +58,12 @@ class SidraApiError(Exception, Generic[E]):
         **kwargs: Any
     ) -> 'SidraApiError':
         """Create a SidraApiError from another exception.
-        
+
         Args:
             exc: The original exception to wrap.
             message: Custom message (defaults to str(exc)).
             **kwargs: Additional arguments to pass to SidraApiError.
-            
+
         Returns:
             A new SidraApiError instance.
         """
@@ -71,6 +75,8 @@ class SidraApiError(Exception, Generic[E]):
 
 
 # Common error codes as class variables for consistency
+
+
 class ErrorCodes:
     """Standard error codes for SIDRA API errors."""
     TABLE_NOT_FOUND = "TABLE_NOT_FOUND"
@@ -81,7 +87,7 @@ class ErrorCodes:
     NO_DATA = "NO_DATA"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     CACHE_ERROR = "CACHE_ERROR"
-    
+
 # Set error codes as class attributes for easy access
 SidraApiError.ErrorCodes = ErrorCodes  # type: ignore
 

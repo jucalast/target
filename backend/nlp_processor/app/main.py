@@ -33,6 +33,8 @@ app.add_middleware(
 )
 
 # Function to create database tables
+
+
 def create_db_tables():
     Base.metadata.create_all(bind=engine)
 
@@ -52,5 +54,7 @@ app.include_router(analysis_api.router, prefix="/api/v1/analysis", tags=["Analys
 app.include_router(ibge_api.router, prefix="/api/v1/ibge", tags=["IBGE Data"])
 
 @app.get("/")
+
+
 def read_root():
     return {"message": "Bem-vindo à API do Sistema de Identificação de Público-Alvo"}

@@ -25,6 +25,8 @@ embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 # ==============================================================================
 # Funções Auxiliares de NLP
 # ==============================================================================
+
+
 def _normalize_text(text: str) -> str:
     """
     Limpa e normaliza o texto de entrada.
@@ -40,6 +42,8 @@ def _normalize_text(text: str) -> str:
 # ==============================================================================
 # Serviço Principal de Análise
 # ==============================================================================
+
+
 def create_and_extract_features(db: Session, user_id: int, analysis_input: AnalysisCreate) -> AnalysisModel:
     """
     Orquestra o processo completo de extração de características e persistência.

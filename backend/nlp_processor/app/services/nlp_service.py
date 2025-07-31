@@ -41,32 +41,34 @@ PORTUGUESE_STOP_WORDS = text.ENGLISH_STOP_WORDS.union({
     'estes', 'estas', 'aquele', 'aquela', 'aqueles', 'aquelas', 'isto', 'aquilo'
 })
 
+
 def normalize_text(text: str) -> str:
     """
     Normaliza o texto para minúsculas, remove acentos e caracteres especiais.
-    
+
     Args:
         text: Texto a ser normalizado
-        
+
     Returns:
         Texto normalizado
     """
     import unicodedata
     import re
-    
+
     # Converte para minúsculas
     text = text.lower()
-    
+
     # Remove acentos
     text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
-    
+
     # Remove caracteres especiais, mantendo apenas letras, números e espaços
     text = re.sub(r'[^\w\s]', ' ', text)
-    
+
     # Remove espaços extras
     text = ' '.join(text.split())
-    
+
     return text
+
 
 def extract_keywords_tfidf(
     texts: List[str], 
@@ -75,12 +77,12 @@ def extract_keywords_tfidf(
 ) -> Tuple[List[str], List[float]]:
     """
     Extrai palavras-chave usando TF-IDF.
-    
+
     Args:
         texts: Lista de textos para análise
         max_features: Número máximo de palavras-chave a retornar
         ngram_range: Faixa de n-gramas a serem considerados
-        
+
     Returns:
         Tupla com (palavras-chave, escores TF-IDF)
     """
@@ -90,24 +92,25 @@ def extract_keywords_tfidf(
         stop_words=PORTUGUESE_STOP_WORDS,
         max_features=max_features * 2  # Pega mais features para filtrar depois
     )
-    
+
     # Ajusta e transforma os textos
     tfidf_matrix = tfidf.fit_transform(texts)
-    
+
     # Obtém as palavras (features)
     feature_names = tfidf.get_feature_names_out()
-    
+
     # Soma os escores TF-IDF para cada palavra entre todos os documentos
     scores = tfidf_matrix.sum(axis=0).A1
-    
+
     # Ordena as palavras por score
     top_indices = scores.argsort()[::-1][:max_features]
-    
+
     # Retorna as palavras-chave e seus escores
     keywords = [feature_names[i] for i in top_indices]
     keyword_scores = [float(scores[i]) for i in top_indices]
-    
+
     return keywords, keyword_scores
+
 
 def extract_topics_lda(
     texts: List[str],
@@ -117,13 +120,13 @@ def extract_topics_lda(
 ) -> List[Dict[str, Any]]:
     """
     Extrai tópicos usando LDA (Latent Dirichlet Allocation).
-    
+
     Args:
         texts: Lista de textos para análise
         n_topics: Número de tópicos a serem extraídos
         n_top_words: Número de palavras por tópico
         max_iter: Número máximo de iterações do algoritmo LDA
-        
+
     Returns:
         Lista de dicionários, cada um representando um tópico com suas palavras-chave
     """
@@ -134,10 +137,10 @@ def extract_topics_lda(
         stop_words=PORTUGUESE_STOP_WORDS,
         ngram_range=(1, 2)
     )
-    
+
     # Ajusta e transforma os textos
     tf = tf_vectorizer.fit_transform(texts)
-    
+
     # Treina o modelo LDA
     lda = LatentDirichletAllocation(
         n_components=n_topics,
@@ -146,18 +149,18 @@ def extract_topics_lda(
         learning_offset=50.,
         random_state=42
     )
-    
+
     lda.fit(tf)
-    
+
     # Obtém as palavras (features)
     feature_names = tf_vectorizer.get_feature_names_out()
-    
+
     # Extrai as palavras mais importantes de cada tópico
     topics = []
     for topic_idx, topic in enumerate(lda.components_):
         # Pega os índices das palavras mais importantes
         top_indices = topic.argsort()[:-n_top_words - 1:-1]
-        
+
         # Cria um dicionário para o tópico
         topic_data = {
             'topic_id': topic_idx,
@@ -165,24 +168,25 @@ def extract_topics_lda(
             'scores': [float(topic[i]) for i in top_indices]
         }
         topics.append(topic_data)
-    
+
     return topics
+
 
 def extract_features(niche: str, description: str) -> Dict[str, Any]:
     """
     Processa o nicho e a descrição para extrair características de PLN.
-    
+
     Esta função combina várias técnicas de PLN para extrair informações úteis:
     - Normalização de texto
     - Extração de palavras-chave com TF-IDF
     - Modelagem de tópicos com LDA
     - Reconhecimento de entidades nomeadas
     - Geração de embeddings
-    
+
     Args:
         niche: O nicho de negócio
         description: A descrição detalhada
-        
+
     Returns:
         Dicionário com as características extraídas
     """
@@ -193,63 +197,63 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
     normalized_niche = normalize_text(niche)
     normalized_description = normalize_text(description)
     full_text = f"{normalized_niche}. {normalized_description}"
-    
+
     # 2. Processamento com spaCy
     doc = nlp(full_text)
-    
+
     # 3. Extração de palavras-chave com TF-IDF
     # Usamos tanto o nicho quanto a descrição como documentos separados
     texts_for_tfidf = [normalized_niche, normalized_description]
-    
+
     # Extrai palavras-chave do nicho (com maior peso)
     niche_keywords, niche_scores = extract_keywords_tfidf(
         [normalized_niche], 
         max_features=10
     )
-    
+
     # Extrai palavras-chave da descrição
     desc_keywords, desc_scores = extract_keywords_tfidf(
         [normalized_description],
         max_features=15
     )
-    
+
     # Combina as palavras-chave, dando prioridade às do nicho
     keywords = []
     seen = set()
-    
+
     # Adiciona palavras-chave do nicho primeiro (com peso maior)
     for kw, score in zip(niche_keywords, niche_scores):
         if kw not in seen:
             keywords.append({'keyword': kw, 'score': score * 1.5})  # Aumenta o peso do nicho
             seen.add(kw)
-    
+
     # Adiciona palavras-chave da descrição
     for kw, score in zip(desc_keywords, desc_scores):
         if kw not in seen and len(keywords) < 20:  # Limita ao total de 20 palavras-chave
             keywords.append({'keyword': kw, 'score': score})
             seen.add(kw)
-    
+
     # Ordena as palavras-chave por score
     keywords = sorted(keywords, key=lambda x: x['score'], reverse=True)
-    
+
     # 4. Extração de tópicos com LDA
     # Usamos frases da descrição como documentos separados
     sentences = [sent.text for sent in nlp(normalized_description).sents]
     if len(sentences) < 3:  # Se não houver frases suficientes, usa a descrição inteira
         sentences = [normalized_description]
-    
+
     topics = extract_topics_lda(
         sentences,
         n_topics=min(3, len(sentences)),  # No máximo 3 tópicos
         n_top_words=5
     )
-    
+
     # 5. Reconhecimento de Entidades Nomeadas (NER)
     entities = [
         {'text': ent.text, 'label': ent.label_, 'start': ent.start_char, 'end': ent.end_char}
         for ent in doc.ents
     ]
-    
+
     # 6. Geração de Embeddings
     # 6.1 Embedding do texto completo com BERT
     if BERT_AVAILABLE:
@@ -259,7 +263,7 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
             convert_to_tensor=False,
             show_progress_bar=False
         ).tolist()
-        
+
         # Gera embeddings para cada tópico
         topic_embeddings = []
         for topic in topics:
@@ -270,21 +274,21 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
                 show_progress_bar=False
             ).tolist()
             topic_embeddings.append(topic_embedding)
-        
+
         # Calcula similaridade entre tópicos e o texto completo
         if len(topic_embeddings) > 0:
             similarities = cosine_similarity(
                 [bert_embedding],
                 topic_embeddings
             )[0]
-            
+
             # Adiciona a similaridade a cada tópico
             for i, sim in enumerate(similarities):
                 topics[i]['similarity_to_main_text'] = float(sim)
     else:
         # Fallback para embeddings do spaCy se BERT não estiver disponível
         bert_embedding = doc.vector.tolist()
-    
+
     # 7. Montagem do resultado
     result = {
         'normalized_text': full_text,
@@ -310,5 +314,5 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
             ]
         }
     }
-    
+
     return result

@@ -7,6 +7,7 @@ from datetime import datetime
 # Schema Base
 # ==============================================================================
 
+
 class UserBase(BaseModel):
     """
     Schema base para a entidade User.
@@ -14,7 +15,6 @@ class UserBase(BaseModel):
     Isso evita a repetição de código (princípio DRY).
     """
     email: EmailStr  # Utiliza EmailStr para validação automática do formato do e-mail.
-
 # ==============================================================================
 # Schema para Criação de Usuário
 # ==============================================================================
@@ -27,7 +27,6 @@ class UserCreate(UserBase):
     para o endpoint de criação de usuário.
     """
     password: str
-
 # ==============================================================================
 # Schema para Leitura de Usuário (Resposta da API)
 # ==============================================================================
@@ -37,7 +36,6 @@ class UserRead(UserBase):
     Schema usado para retornar os dados de um usuário pela API.
     Herda o campo 'email' de UserBase e adiciona os campos que são seguros
     para serem expostos ao cliente.
-
     Criticamente, este schema NÃO inclui o campo 'password', garantindo que
     o hash da senha nunca seja enviado em uma resposta da API.
     """
@@ -47,7 +45,8 @@ class UserRead(UserBase):
     class Config:
         """
         Configuração do Pydantic para o schema.
-        'from_attributes = True' (anteriormente 'orm_mode = True') permite que o
+        'from_attributes = True' (\
+            anteriormente 'orm_mode = True') permite que o
         Pydantic leia os dados diretamente de um objeto de modelo ORM
         (como um objeto SQLAlchemy), em vez de apenas de um dicionário.
         Isso é essencial para mapear o modelo do banco de dados para este schema

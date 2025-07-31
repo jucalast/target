@@ -21,6 +21,8 @@ router = APIRouter()
     summary="Cria e processa uma nova análise de negócio",
     description="Recebe o nicho e a descrição de um negócio, extrai características via NLP e retorna o resultado estruturado."
 )
+
+
 def create_analysis(
     analysis_input: analysis_schema.AnalysisCreate,
     db: Session = Depends(get_db),
@@ -40,7 +42,7 @@ def create_analysis(
     # O user_id seria obtido do usuário autenticado (ex: current_user.id)
     # Por enquanto, usaremos um ID fixo para fins de desenvolvimento.
     user_id_placeholder = 1 
-    
+
     return analysis_service.create_and_extract_features(
         db=db, 
         user_id=user_id_placeholder, 

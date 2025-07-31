@@ -20,6 +20,8 @@ router = APIRouter()
     response_model=user_schema.UserRead,
     status_code=status.HTTP_201_CREATED
 )
+
+
 def create_user(
     user: user_schema.UserCreate,
     db: Session = Depends(get_db)

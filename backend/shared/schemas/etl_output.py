@@ -9,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field, HttpUrl
 
+
 class DataSource(str, Enum):
     """Fontes de dados suportadas pelo pipeline ETL."""
     IBGE_SIDRA = "ibge_sidra"
@@ -29,13 +30,14 @@ class DataPoint(BaseModel):
     source: DataSource = Field(..., description="Fonte dos dados")
     timestamp: datetime = Field(..., description="Data/hora da coleta")
     confidence: float = Field(1.0, description="Nível de confiança (0-1)")
-    quality: DataQualityLevel = Field(DataQualityLevel.UNKNOWN, description="Qualidade do dado")
+    quality: DataQualityLevel = Field(DataQualityLevel.UNKNOWN,\
+        description="Qualidade do dado")
     meta_info: Dict[str, Any] = Field(
         default_factory=dict,
         alias="metadata",  # Mantém compatibilidade com o JSON
         description="Metadados adicionais"
     )
-    
+
     class Config:
         # Permite usar tanto 'meta_info' no código quanto 'metadata' no JSON
         populate_by_name = True
@@ -52,7 +54,8 @@ class MarketMetric(BaseModel):
     )
     trend: Optional[float] = Field(
         None,
-        description="Tendência da métrica (variação percentual em relação ao período anterior)"
+        description="Tendência da métrica (\
+            variação percentual em relação ao período anterior)"
     )
 
 class MarketSegment(BaseModel):
@@ -73,7 +76,8 @@ class NewsArticle(BaseModel):
     summary: str = Field("", description="Resumo do conteúdo")
     sentiment: Optional[float] = Field(
         None,
-        description="Análise de sentimento (-1 a 1, onde -1 é negativo e 1 é positivo)"
+        description="Análise de sentimento (-1 a 1,\
+            onde -1 é negativo e 1 é positivo)"
     )
     keywords: List[str] = Field(
         default_factory=list,
@@ -99,45 +103,40 @@ class SearchTrend(BaseModel):
 class ETLOutput(BaseModel):
     """
     Estrutura de saída do pipeline ETL.
-    
     Este modelo define o formato padronizado dos dados processados que serão
     consumidos pelo próximo módulo de análise.
     """
     # Metadados
     request_id: str = Field(..., description="ID da requisição original")
     timestamp: datetime = Field(..., description="Data/hora da geração")
-    processing_time: float = Field(..., description="Tempo de processamento em segundos")
-    
+    processing_time: float = Field(...,\
+        description="Tempo de processamento em segundos")
     # Dados estruturados
     market_segments: Dict[str, MarketSegment] = Field(
         default_factory=dict,
         description="Segmentos de mercado identificados"
     )
-    
     # Dados de tendências
     search_trends: Dict[str, SearchTrend] = Field(
         default_factory=dict,
         description="Tendências de busca por termo"
     )
-    
     # Notícias e conteúdo
     news_articles: List[NewsArticle] = Field(
         default_factory=list,
         description="Notícias relevantes coletadas"
     )
-    
     # Dados brutos processados (opcional)
     raw_data: Dict[str, Any] = Field(
         default_factory=dict,
         description="Dados brutos processados (para referência)"
     )
-    
     # Estatísticas de processamento
     stats: Dict[str, Any] = Field(
         default_factory=dict,
         description="Estatísticas sobre o processamento"
     )
-    
+
     class Config:
         schema_extra = {
             "example": {
@@ -185,9 +184,10 @@ class ETLOutput(BaseModel):
                         "source": "Portal de Notícias",
                         "url": "https://exemplo.com/noticia",
                         "published_at": "2023-09-28T10:30:00Z",
-                        "summary": "Pequenas empresas que adotam tecnologia...",
+                        "summary": "Pequenas empresas que adotam tecnologia...",\
                         "sentiment": 0.8,
-                        "keywords": ["tecnologia", "pequenas empresas", "crescimento"]
+                        "keywords": ["tecnologia", "pequenas empresas",\
+                            "crescimento"]
                     }
                 ],
                 "stats": {

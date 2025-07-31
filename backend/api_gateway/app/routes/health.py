@@ -26,7 +26,7 @@ router = APIRouter(
     summary="Verifica a saúde da aplicação",
     description="""
     Retorna o status de saúde da aplicação e suas dependências.
-    
+
     - **Status possíveis**:
       - `healthy`: Tudo funcionando corretamente
       - `degraded`: Algum componente não essencial está com problemas
@@ -37,7 +37,7 @@ router = APIRouter(
 async def health_check():
     """
     Endpoint de verificação de saúde da aplicação.
-    
+
     Retorna o status de saúde de todos os componentes monitorados,
     incluindo bancos de dados e recursos do sistema.
     """
@@ -49,7 +49,7 @@ async def health_check():
     description="""
     Verifica se todos os componentes críticos da aplicação estão prontos
     para receber requisições.
-    
+
     Este endpoint é útil para verificações de readiness em orquestradores
     como Kubernetes.
     """,
@@ -67,7 +67,7 @@ async def health_check():
 async def readiness_check():
     """
     Endpoint de verificação de readiness.
-    
+
     Retorna 200 apenas se todos os componentes críticos estiverem saudáveis.
     Caso contrário, retorna 503 Service Unavailable.
     """
@@ -81,7 +81,7 @@ async def readiness_check():
     summary="Verifica se a aplicação está em execução",
     description="""
     Verifica se a aplicação está em execução.
-    
+
     Este endpoint não verifica dependências externas, apenas se o serviço
     está respondendo a requisições HTTP. Útil para verificações de liveness
     em orquestradores como Kubernetes.
@@ -100,7 +100,7 @@ async def readiness_check():
 async def liveness_check():
     """
     Endpoint de verificação de liveness.
-    
+
     Retorna 200 se a aplicação estiver respondendo a requisições HTTP.
     """
     return {"status": "ok", "version": settings.APP_VERSION}

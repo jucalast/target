@@ -1,10 +1,11 @@
 import re
 import sys
 
+
 def fix_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-    
+
     # Fix E302: Add two blank lines before class definition
     for i in range(len(lines)):
         if lines[i].startswith('class '):
@@ -16,10 +17,10 @@ def fix_file(file_path):
             if i - j < 3:  # Less than 2 blank lines before class
                 lines.insert(i, '\n' * (3 - (i - j)))
                 break  # Break after first class to avoid shifting indices
-    
+
     # Fix W293: Remove whitespace from blank lines
     lines = [line if line.strip() else '\n' for line in lines]
-    
+
     # Write the fixed content back to the file
     with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
         f.writelines(lines)

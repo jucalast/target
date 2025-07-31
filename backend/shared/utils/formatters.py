@@ -2,10 +2,11 @@
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from shared.schemas.output_schema import (
+
     MarketAnalysisOutput, NLPAnalysis, Keyword, Topic, Entity, Embedding,
     IBGEData, GoogleTrendsData
 )
+
 
 def format_market_analysis(
     analysis_id: str,
@@ -37,7 +38,8 @@ def _format_nlp_analysis(features: Dict[str, Any]) -> NLPAnalysis:
     """Format NLP features."""
     return NLPAnalysis(
         keywords=[
-            Keyword(keyword=k['keyword'], score=k.get('score', 0.0), source=k.get('source'))
+            Keyword(keyword=k['keyword'], score=k.get('score', 0.0),\
+                source=k.get('source'))
             for k in features.get('keywords', [])
         ],
         topics=[
@@ -52,7 +54,8 @@ def _format_nlp_analysis(features: Dict[str, Any]) -> NLPAnalysis:
             for t in features.get('topics', [])
         ],
         entities=[
-            Entity(text=e['text'], type=e['type'], start=e['start'], end=e['end'])
+            Entity(text=e['text'], type=e['type'], start=e['start'],\
+                end=e['end'])
             for e in features.get('entities', [])
         ],
         embeddings={

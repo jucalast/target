@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from shared.utils.config import settings
 
 # Importa a Base do postgres.py para garantir que todos os modelos usem a mesma Base
-from .postgres import Base
+
 
 # Usa a URL do PostgreSQL da configuração centralizada
 SQLALCHEMY_DATABASE_URL = settings.POSTGRESQL_URL
@@ -22,9 +22,9 @@ engine = create_engine(
 # Configuração da fábrica de sessões
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 def get_db():
     """Gera uma sessão do banco de dados para uso em dependências do FastAPI.
-    
     Yields:
         Session: Sessão do SQLAlchemy
     """

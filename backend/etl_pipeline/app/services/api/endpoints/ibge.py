@@ -32,7 +32,7 @@ sidra_service = SIDRAService()
     summary="Consulta genérica ao IBGE",
     description="""
     Realiza uma consulta genérica ao IBGE com base em um conceito pré-mapeado.
-    
+
     Conceitos disponíveis:
     - jovens_adultos: Dados demográficos de jovens adultos (18-39 anos)
     - consumo_cultural: Dados de despesas com cultura e lazer
@@ -40,6 +40,8 @@ sidra_service = SIDRAService()
     - condicoes_vida: Dados sobre condições de vida e bem-estar
     """
 )
+
+
 def query_ibge(
     query: IBGEQueryBase,
     db: Session = Depends(get_db)
@@ -49,17 +51,17 @@ def query_ibge(
     """
     try:
         logger.info(f"Consultando IBGE para conceito: {query.concept}")
-        
+
         # Obter dados do serviço SIDRA
         df = sidra_service.get_concept_data(
             concept=query.concept,
             location=query.location,
             period=query.period
         )
-        
+
         # Converter DataFrame para lista de dicionários
         data = df.to_dict(orient='records')
-        
+
         return IBEResult(
             concept=query.concept,
             location=query.location or "brasil",
@@ -71,7 +73,7 @@ def query_ibge(
                 "row_count": len(data)
             }
         )
-        
+
     except ValueError as e:
         logger.error(f"Erro na consulta ao IBGE: {str(e)}")
         raise HTTPException(
@@ -94,6 +96,8 @@ def query_ibge(
     Realiza uma consulta demográfica ao IBGE com filtros específicos.
     """
 )
+
+
 def query_demographic(
     query: IBGEDemographicQuery,
     db: Session = Depends(get_db)
@@ -103,7 +107,7 @@ def query_demographic(
     """
     try:
         logger.info(f"Consultando dados demográficos: {query.dict()}")
-        
+
         # Obter perfil demográfico do serviço SIDRA
         # NOTA: O método get_demographic_profile não existia. Adicionei uma
         # implementação base no arquivo sidra_connector.py (veja abaixo).
@@ -114,7 +118,7 @@ def query_demographic(
             location=query.location,
             period=query.period
         )
-        
+
         return IBGEDemographicResult(
             concept="demographic_profile",
             location=query.location or "brasil",
@@ -129,7 +133,7 @@ def query_demographic(
                 "row_count": len(result.get("data", []))
             }
         )
-        
+
     except ValueError as e:
         logger.error(f"Erro na consulta demográfica: {str(e)}")
         raise HTTPException(

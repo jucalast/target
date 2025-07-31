@@ -4,10 +4,11 @@ from sqlalchemy.orm import Session
 from shared.db.models import user as user_model
 from shared.schemas import user as user_schema
 from shared.utils.security import get_password_hash
-    
+
 # ==============================================================================
 # Funções de Serviço para a Entidade User
 # ==============================================================================
+
 
 def get_user_by_email(db: Session, email: str) -> user_model.User | None:
     """

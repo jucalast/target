@@ -9,6 +9,7 @@ from typing import List, Dict, Optional, Any
 from enum import Enum
 from pydantic import BaseModel, Field, HttpUrl, validator
 
+
 class NewsSourceType(str, Enum):
     """Tipos de fontes de notícias suportadas."""
     NEWSPAPER = "newspaper"
@@ -46,7 +47,8 @@ class NewsSource(BaseModel):
     )
     domain: str = Field(
         ...,
-        description="Domínio da fonte de notícias (ex: agenciabrasil.ebc.com.br)"
+        description="Domínio da fonte de notícias (\
+            ex: agenciabrasil.ebc.com.br)"
     )
     url: HttpUrl = Field(
         ...,
@@ -76,7 +78,7 @@ class NewsSource(BaseModel):
         default_factory=dict,
         description="Metadados adicionais sobre a fonte"
     )
-    
+
     class Config:
         schema_extra = {
             "example": {
@@ -88,7 +90,8 @@ class NewsSource(BaseModel):
                 "language": "pt-BR",
                 "country": "BR",
                 "description": "Agência pública de notícias do Brasil",
-                "logo_url": "https://agenciabrasil.ebc.com.br/static/logo-abr.png"
+                "logo_url": "https://agenciabrasil.ebc.com.br/static/logo-\
+                    abr.png"
             }
         }
 
@@ -151,11 +154,13 @@ class NewsArticle(BaseModel):
         None,
         ge=-1.0,
         le=1.0,
-        description="Pontuação de sentimento entre -1 (negativo) e 1 (positivo)"
+        description="Pontuação de sentimento entre -1 (negativo) e 1 (\
+            positivo)"
     )
     entities: List[Dict[str, Any]] = Field(
         default_factory=list,
-        description="Entidades nomeadas extraídas do texto (pessoas, organizações, locais, etc.)"
+        description="Entidades nomeadas extraídas do texto (pessoas,\
+            organizações, locais, etc.)"
     )
     metadata: Dict[str, Any] = Field(
         default_factory=dict,
@@ -169,7 +174,7 @@ class NewsArticle(BaseModel):
         default_factory=datetime.utcnow,
         description="Data e hora da última atualização do registro"
     )
-    
+
     class Config:
         schema_extra = {
             "example": {
@@ -188,21 +193,24 @@ class NewsArticle(BaseModel):
                 "categories": ["economy", "agriculture", "ibge"],
                 "language": "pt-BR",
                 "search_query": "previsão safra grãos 2023",
-                "keywords": ["IBGE", "safra recorde", "grãos", "agricultura", "previsão"],
+                "keywords": ["IBGE", "safra recorde", "grãos", "agricultura",\
+                    "previsão"],
                 "sentiment_score": 0.75,
                 "metadata": {
                     "word_count": 450,
                     "extracted_at": "2023-01-15T11:05:23Z",
                     "has_image": True,
-                    "image_url": "https://agenciabrasil.ebc.com.br/sites/default/files/thumbnails/image/safra_graos.jpg"
+                    "image_url": "https://agenciabrasil.ebc.com.br/sites/\
+                        default/files/thumbnails/image/safra_graos.jpg"
                 }
             }
         }
-    
     @validator('categories', pre=True, always=True)
+
     def set_categories(cls, v, values):
         """Garante que a categoria principal esteja na lista de categorias."""
-        if 'category' in values and values['category'] and values['category'] not in v:
+        if 'category' in values and values['category'] and \
+            values['category'] not in v:
             return [values['category']] + v
         return v or []
 
@@ -232,7 +240,7 @@ class NewsSearchResult(BaseModel):
         default_factory=dict,
         description="Facetas para filtragem (ex: por fonte, categoria, data)"
     )
-    
+
     class Config:
         schema_extra = {
             "example": {
@@ -242,9 +250,11 @@ class NewsSearchResult(BaseModel):
                 "page_size": 10,
                 "articles": [],  # Lista de NewsArticle
                 "facets": {
-                    "source": {"Agência Brasil": 45, "IBGE": 32, "Governo Federal": 47},
-                    "category": {"economy": 85, "politics": 23, "business": 16},
-                    "published_at": {"2023-01": 45, "2022-12": 56, "2022-11": 23}
+                    "source": {"Agência Brasil": 45, "IBGE": 32,\
+                        "Governo Federal": 47},
+                    "category": {"economy": 85, "politics": 23, "business": 16},\
+                    "published_at": {"2023-01": 45, "2022-12": 56,\
+                        "2022-11": 23}
                 }
             }
         }
