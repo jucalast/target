@@ -1,6 +1,5 @@
 # Dependências do módulo NLP Processor
-# Inclui as dependências compartilhadas + dependências específicas de NLP
--r ../shared/requirements.txt
+# As dependências compartilhadas são instaladas pelo Dockerfile
 
 # Processamento de linguagem natural
 spacy[transformers]>=3.6.0,<3.8.0
