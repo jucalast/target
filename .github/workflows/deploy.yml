@@ -61,8 +61,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # SSH into the server and run deployment commands
-          ssh -o StrictHostKeyChecking=no ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} << 'ENDSSH'
+          # SSH into the server and run deployment commands with keepalive to prevent timeouts
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} << 'ENDSSH'
             # Navigate to home directory
             cd ~
             
