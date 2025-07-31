@@ -24,13 +24,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
+          
       - name: Deploy to OCI Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ${{ secrets.OCI_USER }}
-          key: ${{ secrets.OCI_SSH_KEY }}
-          script: |
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          # SSH into the server and run deployment commands
+          ssh -o StrictHostKeyChecking=no ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} << 'ENDSSH'
             # Navigate to project directory
             cd ~/target-audience-identifier
             
@@ -52,6 +58,9 @@ jobs:
               fi
             fi
             
+            # Ensure the .env file has the correct permissions
+            chmod 600 .env.prod
+            
             # Pull latest images and deploy
             echo "Pulling latest Docker images..."
             docker-compose -f docker-compose.prod.yml pull
@@ -68,3 +77,4 @@ jobs:
             docker ps
             
             echo "Deployment completed successfully!"
+          ENDSSH

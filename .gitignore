@@ -35,9 +35,6 @@ env/
 
 # Environment variables
 .env
-.env.*
-!.env.example
-!env.prod.template
 .env.local
 
 # Logs
