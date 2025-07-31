@@ -1,6 +1,5 @@
 # Dependências do módulo ETL Pipeline
-# Inclui as dependências compartilhadas + dependências específicas de ETL
--r ../shared/requirements.txt
+# As dependências compartilhadas são instaladas pelo Dockerfile
 
 # Processamento de dados
 pandas>=2.0.0,<3.0.0

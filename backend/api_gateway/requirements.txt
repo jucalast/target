@@ -1,6 +1,5 @@
 # Dependências do módulo API Gateway
-# Inclui as dependências compartilhadas + dependências específicas da API
--r ../shared/requirements.txt
+# As dependências compartilhadas são instaladas pelo Dockerfile
 
 # Dependências para testes
 pytest>=7.0.0,<8.0.0 
