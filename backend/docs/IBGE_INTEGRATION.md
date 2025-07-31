@@ -5,7 +5,7 @@ Este documento descreve como utilizar a integração com a API do IBGE para obte
 ## Visão Geral
 
 O sistema utiliza a API SIDRA do IBGE para acessar dados públicos de forma programática. A implementação inclui:  
-
+ 
 - **SIDRAClient**: Cliente de baixo nível para a API SIDRA
 - **SIDRAMapper**: Mapeia conceitos de negócio para códigos SIDRA
 - **SIDRAService**: Camada de serviço de alto nível para consultas comuns
