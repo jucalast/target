@@ -23,8 +23,8 @@ class MongoDBConnection:
     _db = None
 
     def __new__(cls):
-    if cls._instance is None:
-    cls._instance = super(MongoDBConnection, cls).__new__(cls)
+        if cls._instance is None:
+        cls._instance = super(MongoDBConnection, cls).__new__(cls)
             cls._instance._initialize_connection()
         return cls._instance
 
@@ -103,7 +103,7 @@ class MongoDBConnection:
             self._db = None
             logger.info("Conexão com MongoDB encerrada")
 
-db_connection = MongoDBConnection()
+    db_connection = MongoDBConnection()
 
 def get_mongodb() -> Database:
 """
@@ -111,7 +111,7 @@ def get_mongodb() -> Database:
     Returns:
     Instância do banco de dados MongoDB
     """
-    return db_connection.db
+        return db_connection.db
 
 def get_collection(collection_name: str):
 """
@@ -121,4 +121,4 @@ def get_collection(collection_name: str):
     Returns:
     Objeto de coleção do MongoDB
     """
-    return db_connection.get_collection(collection_name)
+        return db_connection.get_collection(collection_name)

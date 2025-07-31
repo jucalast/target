@@ -50,8 +50,8 @@ def query_populacao_por_idade():
     except Exception as e:
     print(f"Erro ao consultar a tabela: {str(e)}")
         return None
-if __name__ == "__main__":
-print("Iniciando consulta à tabela de população por grupo de idade...")
+    if __name__ == "__main__":
+    print("Iniciando consulta à tabela de população por grupo de idade...")
     df = query_populacao_por_idade()
     if df is not None and not df.empty:
     print("\nConsulta concluída com sucesso!")

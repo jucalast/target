@@ -34,8 +34,8 @@ class PostgreSQLConnection:
     _session_factory = None
 
     def __new__(cls):
-    if cls._instance is None:
-    cls._instance = super(PostgreSQLConnection, cls).__new__(cls)
+        if cls._instance is None:
+        cls._instance = super(PostgreSQLConnection, cls).__new__(cls)
             cls._instance._initialize_connection()
         return cls._instance
 
@@ -75,7 +75,7 @@ class PostgreSQLConnection:
         if self._engine is None:
         self._initialize_connection()
         return self._engine
-    @property
+        @property
 
     def session(self) -> Session:
     """Retorna uma nova sessão do banco de dados."""
@@ -141,17 +141,17 @@ postgres_conn = PostgreSQLConnection()
 
 def get_postgres() -> PostgreSQLConnection:
 """
-    Função de dependência para injeção em rotas FastAPI.
-    Returns:
-    Instância do gerenciador de conexão PostgreSQL
+        Função de dependência para injeção em rotas FastAPI.
+        Returns:
+        Instância do gerenciador de conexão PostgreSQL
     """
     return postgres_conn
 
 def get_db() -> Generator[Session, None, None]:
 """
-    Função de dependência para injeção de sessão do banco de dados em rotas FastAPI.
-    Yields:
-    Session: Sessão do banco de dados SQLAlchemy
+        Função de dependência para injeção de sessão do banco de dados em rotas FastAPI.
+        Yields:
+        Session: Sessão do banco de dados SQLAlchemy
     """
     with postgres_conn.get_session() as session:
     yield session

@@ -40,7 +40,7 @@ def fetch_common_queries(service: SIDRAService, cache_dir: Path):
     (25, 39),
     (40, 59),
     (60, 100)
-]
+    ]
 
     for location in locations:
     for age_range in age_ranges:

@@ -175,16 +175,16 @@ class NewsArticle(BaseModel):
     )
 
     class Config:
-    schema_extra = {
-    "example": {
-    "title": "IBGE prevê safra recorde de grãos em 2023",
-    "content": "O Instituto Brasileiro de Geografia e Estatística (IBGE) divulgou...",
-    "url": "https://agenciabrasil.ebc.com.br/economia/noticia/2023-01/ibge-preve-safra-recorde-graos-2023",
-    "source": {
-    "name": "Agência Brasil",
-    "domain": "agenciabrasil.ebc.com.br",
-    "url": "https://agenciabrasil.ebc.com.br",
-    "type": "news_agency"
+        schema_extra = {
+        "example": {
+        "title": "IBGE prevê safra recorde de grãos em 2023",
+        "content": "O Instituto Brasileiro de Geografia e Estatística (IBGE) divulgou...",
+        "url": "https://agenciabrasil.ebc.com.br/economia/noticia/2023-01/ibge-preve-safra-recorde-graos-2023",
+        "source": {
+        "name": "Agência Brasil",
+        "domain": "agenciabrasil.ebc.com.br",
+        "url": "https://agenciabrasil.ebc.com.br",
+        "type": "news_agency"
                 },
                 "published_at": "2023-01-15T10:30:00-03:00",
                 "author": "Repórter da Agência Brasil",
@@ -204,7 +204,7 @@ class NewsArticle(BaseModel):
                 }
             }
         }
-    @validator('categories', pre=True, always=True)
+        @validator('categories', pre=True, always=True)
 
     def set_categories(cls, v, values):
     """Garante que a categoria principal esteja na lista de categorias."""
@@ -215,41 +215,41 @@ class NewsArticle(BaseModel):
 
 class NewsSearchResult(BaseModel):
 """Resultado de uma busca por notícias."""
-    query: str = Field(
+        query: str = Field(
         ...,
         description="Termo de busca original"
-    )
-    total_results: int = Field(
+        )
+        total_results: int = Field(
         ...,
         description="Número total de resultados encontrados"
-    )
-    page: int = Field(
+        )
+        page: int = Field(
         default=1,
         description="Número da página atual"
-    )
-    page_size: int = Field(
+        )
+        page_size: int = Field(
         default=10,
         description="Número de itens por página"
-    )
-    articles: List[NewsArticle] = Field(
+        )
+        articles: List[NewsArticle] = Field(
         default_factory=list,
         description="Lista de artigos de notícias"
-    )
-    facets: Dict[str, Dict[str, int]] = Field(
+        )
+        facets: Dict[str, Dict[str, int]] = Field(
         default_factory=dict,
         description="Facetas para filtragem (ex: por fonte, categoria, data)"
-    )
+        )
 
     class Config:
-    schema_extra = {
-    "example": {
-    "query": "economia brasileira",
-    "total_results": 124,
-    "page": 1,
-    "page_size": 10,
-    "articles": [],
-    "facets": {
-    "source": {"Agência Brasil": 45, "IBGE": 32, \
+        schema_extra = {
+        "example": {
+        "query": "economia brasileira",
+        "total_results": 124,
+        "page": 1,
+        "page_size": 10,
+        "articles": [],
+        "facets": {
+        "source": {"Agência Brasil": 45, "IBGE": 32, \
                         "Governo Federal": 47},
                         "category": {"economy": 85, "politics": 23, "business": 16}, \
                     "published_at": {"2023-01": 45, "2022-12": 56, \

@@ -26,12 +26,12 @@ class Analysis(Base):
         owner: Relationship to the User model
     """
     __tablename__ = "analyses"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(
-        Integer, 
-        ForeignKey("users.id"), 
-        nullable=False, 
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False,
         index=True
     )
     niche = Column(String(100), nullable=False)
@@ -41,5 +41,5 @@ class Analysis(Base):
     entities = Column(JSON, nullable=False)
     embedding = Column(JSON, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     owner = relationship("User", back_populates="analyses")

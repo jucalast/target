@@ -40,7 +40,7 @@ class BasePostgresRepository(Generic[ModelType, CreateSchemaType, \
         self.model = model
         self.postgres = get_postgres()
         self._db = db_session
-    @property
+        @property
 
     def db(self) -> Session:
     """Retorna a sessão ativa do banco de dados."""

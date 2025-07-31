@@ -48,8 +48,8 @@ def query_sidra_example():
     except Exception as e:
     print(f"Erro ao consultar a tabela: {str(e)}")
         return None
-if __name__ == "__main__":
-print("Iniciando consulta à API SIDRA...")
+    if __name__ == "__main__":
+    print("Iniciando consulta à API SIDRA...")
     df = query_sidra_example()
     if df is not None and not df.empty:
     print("\nConsulta concluída com sucesso!")

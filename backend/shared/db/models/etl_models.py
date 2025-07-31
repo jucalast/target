@@ -84,7 +84,7 @@ class MarketMetricModel(Base):
     historical_values = relationship("DataPointModel", backref="metric")
 
     def __repr__(self):
-    return f"<MarketMetric(id={self.id}, name={self.name}, \
+        return f"<MarketMetric(id={self.id}, name={self.name}, \
             segment_id={self.segment_id})>"
 
 class MarketSegmentModel(Base):
@@ -127,7 +127,7 @@ class NewsArticleModel(Base):
         back_populates="news_articles")
 
     def __repr__(self):
-    return f"<NewsArticle(id={self.id}, title={self.title[:50]}...)>"
+        return f"<NewsArticle(id={self.id}, title={self.title[:50]}...)>"
 
 class SearchTrendModel(Base):
 """Modelo para tendências de busca."""
@@ -175,7 +175,7 @@ class ETLResultModel(Base):
         back_populates="etl_results")
 
     def __repr__(self):
-    return f"<ETLResult(id={self.id}, request_id={self.request_id}, \
+        return f"<ETLResult(id={self.id}, request_id={self.request_id}, \
             timestamp={self.timestamp})>"
 
 class ETLRunLogModel(Base):

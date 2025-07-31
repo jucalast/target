@@ -34,7 +34,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         self.collection_name = collection_name
         self.model_class = model_class
         self._collection = None
-    @property
+        @property
 
     def db(self) -> Database:
     """Retorna a instância do banco de dados."""
@@ -79,7 +79,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         if 'id' in data and data['id'] is not None:
         data['_id'] = ObjectId(data.pop('id'))
         return data
-    async def create(self, item: T) -> T:
+        async def create(self, item: T) -> T:
     """
         Cria um novo documento no banco de dados.
         Args:
@@ -93,7 +93,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
 
         created = await self.collection.find_one({'_id': result.inserted_id})
         return self._convert_to_model(created)
-    async def get_by_id(self, item_id: T_ID) -> Optional[T]:
+        async def get_by_id(self, item_id: T_ID) -> Optional[T]:
     """
         Obtém um documento pelo ID.
         Args:
@@ -111,7 +111,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         document = await self.collection.find_one({'_id': item_id})
         return self._convert_to_model(document)
 
-    async def find_one(self, query: Dict[str, Any]) -> Optional[T]:
+        async def find_one(self, query: Dict[str, Any]) -> Optional[T]:
     """
         Encontra um único documento que corresponda à consulta.
         Args:
@@ -121,13 +121,13 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         """
         document = await self.collection.find_one(query)
         return self._convert_to_model(document)
-    async def find(
+        async def find(
         self,
         query: Dict[str, Any] = None,
         skip: int = 0,
         limit: int = 100,
         sort: List[tuple] = None
-    ) -> List[T]:
+        ) -> List[T]:
     """
         Encontra vários documentos que correspondam à consulta.
         Args:
@@ -145,7 +145,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         cursor = cursor.sort(sort)
         return [self._convert_to_model(doc) for doc in await cursor.to_list(\
             length=limit)]
-    async def update(self, item_id: T_ID, item: T) -> bool:
+        async def update(self, item_id: T_ID, item: T) -> bool:
     """
         Atualiza um documento existente.
         Args:
@@ -171,7 +171,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
 
         return result.modified_count > 0
 
-    async def delete(self, item_id: T_ID) -> bool:
+        async def delete(self, item_id: T_ID) -> bool:
     """
         Remove um documento do banco de dados.
         Args:
@@ -189,7 +189,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         result = await self.collection.delete_one({'_id': item_id})
         return result.deleted_count > 0
 
-    async def count(self, query: Dict[str, Any] = None) -> int:
+        async def count(self, query: Dict[str, Any] = None) -> int:
     """
         Conta o número de documentos que correspondem à consulta.
         Args:
@@ -200,7 +200,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         if query is None:
         query = {}
         return await self.collection.count_documents(query)
-    async def exists(self, query: Dict[str, Any]) -> bool:
+        async def exists(self, query: Dict[str, Any]) -> bool:
     """
         Verifica se existe pelo menos um documento que corresponda à consulta.
         Args:
@@ -209,7 +209,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         True se existir pelo menos um documento, False caso contrário
         """
         return await self.collection.count_documents(query, limit=1) > 0
-    async def aggregate(self, pipeline: List[Dict[str, Any]]) -> List[Dict[str, \
+        async def aggregate(self, pipeline: List[Dict[str, Any]]) -> List[Dict[str, \
         Any]]:
         """
         Executa uma operação de agregação no MongoDB.
@@ -220,7 +220,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         """
         cursor = self.collection.aggregate(pipeline)
         return await cursor.to_list(length=None)
-    async def create_indexes(self) -> None:
+        async def create_indexes(self) -> None:
     """
         Cria índices para otimização de consultas.
         Este método deve ser sobrescrito por classes filhas para definir índices específicos.
