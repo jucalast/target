@@ -4,8 +4,8 @@ services:
   # API Gateway - Main entry point
   api_gateway:
     build:
-      context: ./backend
-      dockerfile: api_gateway/Dockerfile
+      context: ./backend/api_gateway
+      dockerfile: Dockerfile
     container_name: api_gateway
     restart: always
     ports:
@@ -31,8 +31,8 @@ services:
   # NLP Service
   nlp_processor:
     build:
-      context: ./backend
-      dockerfile: nlp_processor/Dockerfile
+      context: ./backend/nlp_processor
+      dockerfile: Dockerfile
     container_name: nlp_processor
     restart: always
     environment:
@@ -51,8 +51,8 @@ services:
   # ETL Pipeline
   etl_pipeline:
     build:
-      context: .
-      dockerfile: etl_pipeline/Dockerfile
+      context: ./backend/etl_pipeline
+      dockerfile: Dockerfile
     container_name: etl_pipeline
     restart: always
     environment:
