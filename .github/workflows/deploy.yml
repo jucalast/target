@@ -59,16 +59,24 @@ jobs:
       - name: Deploy to OCI Server
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # SSH into the server and run deployment commands
           ssh -o StrictHostKeyChecking=no ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} << 'ENDSSH'
-            # Navigate to project directory
-            cd ~/target-audience-identifier
+            # Navigate to home directory
+            cd ~
             
-            # Pull latest code
-            echo "Pulling latest code..."
-            git fetch --all
-            git reset --hard origin/main
+            # Clone repository if it doesn't exist, otherwise update it
+            if [ ! -d "target-audience-identifier" ]; then
+              echo "Cloning repository..."
+              git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git target-audience-identifier
+              cd target-audience-identifier
+            else
+              echo "Repository exists, pulling latest code..."
+              cd target-audience-identifier
+              git fetch --all
+              git reset --hard origin/main
+            fi
             
             # Create .env.prod from template if it doesn't exist
             if [ ! -f .env.prod ]; then
