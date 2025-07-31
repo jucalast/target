@@ -39,10 +39,17 @@ jobs:
             git fetch --all
             git reset --hard origin/main
             
-            # Ensure .env.prod exists
+            # Create .env.prod from template if it doesn't exist
             if [ ! -f .env.prod ]; then
-              echo "ERROR: .env.prod file not found!"
-              exit 1
+              echo "WARNING: .env.prod file not found! Creating from template..."
+              if [ -f env.prod.template ]; then
+                cp env.prod.template .env.prod
+                echo "Created .env.prod from template. Please update the values and redeploy."
+                exit 1
+              else
+                echo "ERROR: env.prod.template not found. Cannot create .env.prod"
+                exit 1
+              fi
             fi
             
             # Pull latest images and deploy
