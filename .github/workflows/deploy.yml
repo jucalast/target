@@ -26,10 +26,35 @@ jobs:
           
       - name: Set up SSH
         run: |
+          # Create .ssh directory if it doesn't exist
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Verify required secrets are set
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "::error::SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.OCI_HOST }}" ]; then
+            echo "::error::OCI_HOST secret is not set"
+            exit 1
+          fi
+          
+          # Write private key
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
+          
+          # Add host to known_hosts
+          echo "Adding ${{ secrets.OCI_HOST }} to known_hosts..."
+          ssh-keyscan -H ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          
+          # Test SSH connection
+          echo "Testing SSH connection to ${{ secrets.OCI_HOST }}..."
+          if ! ssh -T -o BatchMode=yes -o ConnectTimeout=5 ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} exit; then
+            echo "::error::Failed to establish SSH connection to ${{ secrets.OCI_HOST }}"
+            exit 1
+          fi
           
       - name: Deploy to OCI Server
         env:
