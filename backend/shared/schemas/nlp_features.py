@@ -33,11 +33,20 @@ class EmbeddingFeature(BaseModel):
     vector: List[float] = Field(..., description="Vetor de embedding")
     dim: int = Field(..., description="Dimensão do vetor de embedding")
 
+class NLPSummary(BaseModel):
+    """Resumo dos resultados da análise de NLP."""
+    main_subject: str = Field(..., description="Assunto principal identificado no texto")
+    key_entities: List[str] = Field(..., description="Lista de entidades-chave identificadas")
+    sentiment_score: float = Field(..., description="Pontuação de sentimento (-1 a 1)")
+    sentiment_label: str = Field(..., description="Rótulo do sentimento (ex: 'positive', 'negative', 'neutral')")
+
+
 class NLPFeatures(BaseModel):
     """Estrutura contendo todos os recursos de NLP extraídos."""
     # Texto original e normalizado
     original_text: str = Field(..., description="Texto original fornecido para análise")
     normalized_text: str = Field(..., description="Texto após normalização")
+    summary: Optional[NLPSummary] = Field(None, description="Resumo da análise de NLP")
     
     # Recursos extraídos
     keywords: List[KeywordFeature] = Field(default_factory=list, description="Palavras-chave extraídas")

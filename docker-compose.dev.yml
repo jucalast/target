@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=target_db  # Nome do banco de dados a ser criado automaticamente
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d target_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # MongoDB
+  mongo_db:
+    image: mongo:6.0
+    container_name: mongo_db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-admin}
+      - MONGO_INITDB_DATABASE=target_db  # Nome do banco de dados a ser criado automaticamente
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/target_db --quiet -u ${MONGO_INITDB_ROOT_USERNAME:-admin} -p ${MONGO_INITDB_ROOT_PASSWORD:-admin} --authenticationDatabase admin
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # API Gateway
+  api_gateway:
+    build:
+      context: .
+      dockerfile: backend/api_gateway/Dockerfile
+    container_name: api_gateway
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres_db:5432/${POSTGRES_DB:-target_analysis}
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin}@mongo_db:27017/
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-development-key}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      mongo_db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # NLP Processor
+  nlp_processor:
+    build:
+      context: .
+      dockerfile: backend/nlp_processor/Dockerfile
+    container_name: nlp_processor
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - MODEL_NAME=${NLP_MODEL_NAME:-sentence-transformers/all-MiniLM-L6-v2}
+      - POSTGRES_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres_db:5432/${POSTGRES_DB:-target_analysis}
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin}@mongo_db:27017/
+    volumes:
+      - ./backend:/app/backend
+      - nlp_cache:/root/.cache
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      mongo_db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ETL Service
+  etl_processor:
+    build:
+      context: .
+      dockerfile: backend/etl_pipeline/Dockerfile
+    container_name: etl_processor
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - POSTGRES_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres_db:5432/${POSTGRES_DB:-target_analysis}
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin}@mongo_db:27017/
+      - IBGE_API_KEY=${IBGE_API_KEY:-}
+    volumes:
+      - ./backend:/app/backend
+      - etl_cache:/app/etl_cache
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      mongo_db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      bash -c "python -m etl_pipeline.entrypoints.scheduler"
+
+volumes:
+  postgres_data:
+  mongo_data:
+  nlp_cache:
+  etl_cache:

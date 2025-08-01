@@ -1,6 +1,13 @@
 {
   "tables": [
     {
+      "code": "6407",
+      "name": "Pesquisa Nacional por Amostra de Domicílios Contínua - População",
+      "source": "PNAD Contínua - IBGE",
+      "description": "Dados de população por sexo e grupo de idade",
+      "period": "2012-2023"
+    },
+    {
       "code": "6401",
       "name": "Pesquisa Nacional por Amostra de Domicílios Contínua - PNAD Contínua",
       "source": "PNAD Contínua - IBGE",
@@ -37,6 +44,12 @@
     }
   ],
   "variables": [
+    {
+      "table": "6407",
+      "code": "all",
+      "name": "Todas as variáveis",
+      "description": "População por sexo e grupo de idade"
+    },
     {
       "table": "7482",
       "code": "11029",
@@ -131,11 +144,8 @@
       "name": "População Total",
       "description": "Dados de população total por localidade, sexo e idade.",
       "table_code": 6407,
-      "variables": [93],
-      "classifications": {
-        "C2": "all",
-        "C1": "all"
-      },
+      "variables": ["all"],
+      "classifications": {},
       "metrics": ["populacao_total"]
     },
     "cultura_lazer": {

@@ -28,7 +28,7 @@ except ImportError:
     BERT_DIM = 0
 
 # Configuração de stop words personalizadas
-PORTUGUESE_STOP_WORDS = text.ENGLISH_STOP_WORDS.union({
+PORTUGUESE_STOP_WORDS = list(text.ENGLISH_STOP_WORDS.union({
     'a', 'o', 'e', 'é', 'de', 'do', 'da', 'em', 'um', 'uma', 'para', 'com',
     'não', 'se', 'que', 'por', 'como', 'mais', 'mas', 'ao', 'das', 'dos',
     'à', 'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'nos', 'já', 'eu',
@@ -39,7 +39,7 @@ PORTUGUESE_STOP_WORDS = text.ENGLISH_STOP_WORDS.union({
     'deles', 'vocês', 'vocês', 'lhes', 'meus', 'minha', 'teu', 'tua', 'teus',
     'tuas', 'nosso', 'nossa', 'nossos', 'nossas', 'dela', 'delas', 'esta',
     'estes', 'estas', 'aquele', 'aquela', 'aqueles', 'aquelas', 'isto', 'aquilo'
-})
+}))
 
 def normalize_text(text: str) -> str:
     """
@@ -129,8 +129,8 @@ def extract_topics_lda(
     """
     # Cria o vetorizador de contagem de termos
     tf_vectorizer = TfidfVectorizer(
-        max_df=0.95, 
-        min_df=2,
+        max_df=1.0,  # Ajustado para funcionar com poucos documentos
+        min_df=1,    # Ajustado para funcionar com poucos documentos
         stop_words=PORTUGUESE_STOP_WORDS,
         ngram_range=(1, 2)
     )

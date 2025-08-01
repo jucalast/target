@@ -147,7 +147,7 @@ class ETLRepository(BasePostgresRepository):
                 timestamp=metric.current_value.timestamp,
                 confidence=metric.current_value.confidence,
                 quality=metric.current_value.quality,
-                meta_info=metric.current_value.metadata  # Usando meta_info em vez de metadata
+                meta_info=metric.current_value.meta_info  # Usando meta_info
             )
             self.db.add(current_value)
             self.db.flush()  # Obtém o ID do data point
@@ -175,7 +175,7 @@ class ETLRepository(BasePostgresRepository):
                     timestamp=hist_value.timestamp,
                     confidence=hist_value.confidence,
                     quality=hist_value.quality,
-                    meta_info=hist_value.metadata,  # Usando meta_info em vez de metadata
+                    meta_info=hist_value.meta_info,  # Usando meta_info diretamente
                     metric_id=metric_model.id
                 )
                 self.db.add(hist_point)
@@ -191,7 +191,7 @@ class ETLRepository(BasePostgresRepository):
         for keyword, trend in trends.items():
             trend_model = SearchTrendModel(
                 keyword=trend.keyword,
-                values=[v.dict() for v in trend.values],
+                values=[v.model_dump() if hasattr(v, 'model_dump') else v for v in trend.values],
                 related_queries=trend.related_queries,
                 interest_by_region=trend.interest_by_region,
                 etl_result_id=etl_result_id

@@ -12,10 +12,10 @@ from sqlalchemy.orm import Session
 
 from shared.schemas.analysis import AnalysisCreate
 from shared.db.models.analysis import Analysis as AnalysisModel
-from etl_pipeline.app.services.nlp_service import extract_features
-from etl_pipeline.app.services.sidra_mapper import SIDRAMapper
-from etl_pipeline.app.services.google_trends_service import GoogleTrendsService
-from etl_pipeline.app.services.sidra_client import SidraClient
+from nlp_processor.app.services.nlp_service import extract_features
+from .extractors.ibge.sidra_mapper import SIDRAMapper
+from .extractors.google_trends_service import GoogleTrendsService
+from .extractors.ibge.sidra_connector import SIDRAClient as SidraClient
 
 logger = logging.getLogger(__name__)
 

@@ -83,9 +83,9 @@ class NewsArticle(BaseModel):
 class SearchTrend(BaseModel):
     """Tendência de busca do Google Trends."""
     keyword: str = Field(..., description="Termo de busca")
-    values: List[Dict[datetime, float]] = Field(
+    values: List[Dict[str, Union[str, float]]] = Field(
         ...,
-        description="Série temporal de interesse ao longo do tempo"
+        description="Série temporal de interesse ao longo do tempo no formato [{'date': '2024-01-01', 'value': 50.0}]"
     )
     related_queries: List[Dict[str, Any]] = Field(
         default_factory=list,
@@ -106,6 +106,7 @@ class ETLOutput(BaseModel):
     # Metadados
     request_id: str = Field(..., description="ID da requisição original")
     timestamp: datetime = Field(..., description="Data/hora da geração")
+    status: str = Field("completed", description="Status do processamento")
     processing_time: float = Field(..., description="Tempo de processamento em segundos")
     
     # Dados estruturados
@@ -130,6 +131,12 @@ class ETLOutput(BaseModel):
     raw_data: Dict[str, Any] = Field(
         default_factory=dict,
         description="Dados brutos processados (para referência)"
+    )
+    
+    # Metadados de processamento
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Metadados de processamento incluindo market_size, growth_rate, etc."
     )
     
     # Estatísticas de processamento

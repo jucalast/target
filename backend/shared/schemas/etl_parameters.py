@@ -13,7 +13,7 @@ from .nlp_features import NLPFeatures
 class IBGETableQuery(BaseModel):
     """Parâmetros para consulta a uma tabela específica do IBGE SIDRA."""
     table_code: str = Field(..., description="Código da tabela SIDRA")
-    variables: List[str] = Field(..., description="Lista de códigos de variáveis")
+    variables: List[str] = Field(default_factory=list, description="Lista de códigos de variáveis (vazio = todas)")
     classifications: Dict[str, Union[str, List[str]]] = Field(
         default_factory=dict,
         description="Classificações para filtrar os dados"

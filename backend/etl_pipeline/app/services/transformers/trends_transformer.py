@@ -29,59 +29,246 @@ class TrendsTransformer:
         Returns:
             Dicionário de SearchTrend com as tendências processadas
         """
-        if not raw_data or 'interest' not in raw_data or not raw_data['interest'].get('data'):
-            logger.warning("Dados do Google Trends vazios ou em formato inválido")
+        # Valida entrada
+        if not raw_data:
+            logger.warning("Dados do Google Trends vazios")
+            return {}
+        
+        # Tenta diferentes estruturas de dados
+        interest_data = None
+        if 'interest' in raw_data:
+            interest_data = raw_data['interest']
+        elif 'data' in raw_data:
+            interest_data = raw_data['data']
+        else:
+            # Assume que raw_data já são os dados de interesse
+            interest_data = raw_data
+        
+        # Verifica se interest_data é um DataFrame ou dicionário válido
+        if hasattr(interest_data, 'empty') and interest_data.empty:
+            logger.warning("DataFrame do Google Trends vazio")
+            return {}
+        elif isinstance(interest_data, dict) and not interest_data:
+            logger.warning("Dados do Google Trends sem conteúdo")
+            return {}
+        elif isinstance(interest_data, list) and not interest_data:
+            logger.warning("Lista de dados do Google Trends vazia")
             return {}
             
         try:
             # Processa os dados de interesse ao longo do tempo
-            interest_data = raw_data['interest']['data']
-            related_queries = raw_data.get('related', {})
-            
-            # Para cada termo de busca, cria uma SearchTrend
-            trends = {}
-            
-            # Obtém a lista de termos de busca
-            if not interest_data:
-                return {}
+            if hasattr(interest_data, 'columns'):  # É um DataFrame pandas
+                data_to_process = interest_data
+                related_queries = raw_data.get('related_queries', {})
                 
-            # O primeiro item contém as colunas (data, termo1, termo2, ...)
-            columns = interest_data[0]
-            if len(columns) < 2:  # Precisa ter pelo menos data e um termo
-                return {}
-                
-            # Os termos de busca são todas as colunas exceto a primeira (data)
-            terms = columns[1:]
-            
-            # Para cada termo, cria uma SearchTrend
-            for i, term in enumerate(terms, start=1):
-                # Extrai a série temporal para este termo
-                timeline = []
-                for row in interest_data[1:]:  # Pula o cabeçalho
-                    if len(row) > i:  # Verifica se a linha tem dados para este termo
+                # Para cada coluna (exceto date), cria uma SearchTrend
+                trends = {}
+                for column in data_to_process.columns:
+                    if column.lower() in ['date', 'datetime']:
+                        continue
+                        
+                    # Extrai a série temporal para esta coluna
+                    timeline = []
+                    for idx, row in data_to_process.iterrows():
                         try:
-                            date_str = row[0]
-                            value = int(row[i]) if row[i] != '' else 0
+                            date = row.get('date', idx)
+                            value = int(row[column]) if pd.notna(row[column]) else 0
                             
-                            # Converte a data para datetime
-                            date = self._parse_date(date_str)
-                            if date:
-                                timeline.append({"date": date, "value": value})
-                        except (ValueError, IndexError) as e:
-                            logger.warning(f"Erro ao processar linha do Google Trends: {str(e)}")
+                            # Converte a data para string ISO para compatibilidade com JSON
+                            if hasattr(date, 'isoformat'):
+                                date_str = date.isoformat()
+                            elif isinstance(date, str):
+                                date_str = date
+                            else:
+                                date_str = str(date)
+                            
+                            timeline.append({"date": date_str, "value": float(value)})
+                        except (ValueError, KeyError) as e:
+                            logger.warning(f"Erro ao processar linha do DataFrame: {str(e)}")
+                    
+                    # Obtém consultas relacionadas para este termo
+                    term_related = self._extract_related_queries(related_queries.get(column, {}))
+                    
+                    # Cria a SearchTrend
+                    trends[column] = SearchTrend(
+                        keyword=column,
+                        values=timeline,
+                        related_queries=term_related,
+                        interest_by_region=[]
+                    )
                 
-                # Obtém consultas relacionadas para este termo
-                term_related = self._extract_related_queries(related_queries.get(term, {}))
+                return trends
                 
-                # Cria a SearchTrend
-                trends[term] = SearchTrend(
-                    keyword=term,
-                    values=timeline,
-                    related_queries=term_related,
-                    interest_by_region=[]  # Pode ser preenchido posteriormente
-                )
+            elif isinstance(interest_data, dict):  # É um dicionário com estrutura especial
+                if 'columns' in interest_data and 'data' in interest_data:
+                    # Formato especial: {'columns': ['date', 'term1'], 'data': [['2024-01-01', 50]]}
+                    columns = interest_data['columns']
+                    data_rows = interest_data['data']
+                    
+                    if len(columns) < 2:
+                        logger.warning("Colunas insuficientes nos dados do Google Trends")
+                        return {}
+                    
+                    # Os termos de busca são todas as colunas exceto a primeira (data)
+                    terms = columns[1:]
+                    related_queries = raw_data.get('related_queries', {})
+                    
+                    # Para cada termo, cria uma SearchTrend
+                    trends = {}
+                    for i, term in enumerate(terms, start=1):
+                        # Extrai a série temporal para este termo
+                        timeline = []
+                        for row in data_rows:
+                            if len(row) > i:  # Verifica se a linha tem dados para este termo
+                                try:
+                                    date_str = row[0]
+                                    value = int(row[i]) if row[i] != '' and row[i] is not None else 0
+                                    
+                                    # Usa a data diretamente como string
+                                    timeline.append({"date": str(date_str), "value": float(value)})
+                                except (ValueError, IndexError) as e:
+                                    logger.warning(f"Erro ao processar linha do Google Trends: {str(e)}")
+                        
+                        # Obtém consultas relacionadas para este termo
+                        term_related = self._extract_related_queries(related_queries.get(term, {}))
+                        
+                        # Cria a SearchTrend
+                        trends[term] = SearchTrend(
+                            keyword=term,
+                            values=timeline,
+                            related_queries=term_related,
+                            interest_by_region=[]
+                        )
+                    
+                    return trends
+                elif 'data' in interest_data and 'metadata' in interest_data:
+                    # Formato do pytrends: {'data': DataFrame, 'metadata': {...}}
+                    trends_df = interest_data['data']
+                    
+                    # Se trends_df é uma lista, converte para DataFrame
+                    if isinstance(trends_df, list) and trends_df:
+                        import pandas as pd
+                        trends_df = pd.DataFrame(trends_df)
+                    
+                    if hasattr(trends_df, 'columns') and hasattr(trends_df, 'iterrows'):
+                        # É um DataFrame pandas
+                        trends = {}
+                        for column in trends_df.columns:
+                            if column.lower() in ['date', 'datetime']:
+                                continue
+                                
+                            # Extrai a série temporal para esta coluna
+                            timeline = []
+                            for idx, row in trends_df.iterrows():
+                                try:
+                                    date = row.get('date', idx) if 'date' in trends_df.columns else idx
+                                    value = int(row[column]) if pd.notna(row[column]) else 0
+                                    
+                                    # Converte a data para string ISO para compatibilidade com JSON
+                                    if hasattr(date, 'isoformat'):
+                                        date_str = date.isoformat()
+                                    elif isinstance(date, str):
+                                        date_str = date
+                                    else:
+                                        date_str = str(date)
+                                    
+                                    timeline.append({"date": date_str, "value": float(value)})
+                                except (ValueError, KeyError) as e:
+                                    logger.warning(f"Erro ao processar linha do DataFrame: {str(e)}")
+                            
+                            # Obtém consultas relacionadas para este termo
+                            term_related = self._extract_related_queries(raw_data.get('related_queries', {}).get(column, {}))
+                            
+                            # Cria a SearchTrend
+                            trends[column] = SearchTrend(
+                                keyword=column,
+                                values=timeline,
+                                related_queries=term_related,
+                                interest_by_region=[]
+                            )
+                        
+                        return trends
+                    else:
+                        logger.warning(f"Dados do Google Trends não são um DataFrame válido: {type(trends_df)}")
+                        return {}
+                        
+                else:
+                    logger.warning(f"Formato de dicionário do Google Trends não suportado: {list(interest_data.keys())}")
+                    return {}
+                
+            elif isinstance(interest_data, list) and interest_data:  # É uma lista de records
+                # Converte lista de dicts para DataFrame para processamento
+                try:
+                    import pandas as pd
+                    trends_df = pd.DataFrame(interest_data)
+                    
+                    if trends_df.empty:
+                        logger.warning("DataFrame do Google Trends está vazio")
+                        return {}
+                    
+                    # Remove colunas desnecessárias se existirem
+                    if 'isPartial' in trends_df.columns:
+                        trends_df = trends_df.drop(columns=['isPartial'])
+                    
+                    # Processa o DataFrame como antes
+                    date_column = None
+                    for col in ['date', 'Date', 'DATE']:
+                        if col in trends_df.columns:
+                            date_column = col
+                            break
+                    
+                    if date_column is None:
+                        logger.warning("Coluna de data não encontrada nos dados do Google Trends")
+                        return {}
+                    
+                    # Extrai termos (todas as colunas numéricas exceto data)
+                    numeric_columns = trends_df.select_dtypes(include=['number']).columns
+                    terms = [col for col in numeric_columns if col != date_column]
+                    
+                    if not terms:
+                        logger.warning("Nenhum termo encontrado nos dados do Google Trends")
+                        return {}
+                    
+                    related_queries = raw_data.get('related_queries', {})
+                    
+                    # Para cada termo, cria uma SearchTrend
+                    trends = {}
+                    for term in terms:
+                        # Extrai a série temporal para este termo
+                        timeline = []
+                        for _, row in trends_df.iterrows():
+                            if pd.notna(row[date_column]) and pd.notna(row[term]):
+                                date_val = row[date_column]
+                                if hasattr(date_val, 'isoformat'):
+                                    date_str = date_val.isoformat()
+                                elif isinstance(date_val, str):
+                                    date_str = date_val
+                                else:
+                                    date_str = str(date_val)
+                                
+                                timeline.append({"date": date_str, "value": float(row[term])})
+                        
+                        if not timeline:
+                            continue
+                        
+                        term_related = related_queries.get(term, {})
+                        
+                        trends[term] = SearchTrend(
+                            keyword=term,
+                            values=timeline,
+                            related_queries=term_related,
+                            interest_by_region=[]
+                        )
+                    
+                    return trends
+                    
+                except Exception as e:
+                    logger.error(f"Erro ao processar lista de dados do Google Trends: {str(e)}")
+                    return {}
             
-            return trends
+            else:
+                logger.warning(f"Formato de dados do Google Trends não suportado: {type(interest_data)}")
+                return {}
             
         except Exception as e:
             logger.error(f"Erro ao transformar dados do Google Trends: {str(e)}", exc_info=True)
@@ -172,22 +359,35 @@ class TrendsTransformer:
                 continue
                 
             # Calcula métricas básicas
-            values = [point['value'] for point in trend.values if 'value' in point]
-            if not values:
+            values = []
+            last_point = None
+            for point_dict in trend.values:
+                # Agora esperamos o formato {"date": "2024-01-01", "value": 50.0}
+                if "date" in point_dict and "value" in point_dict:
+                    values.append(point_dict["value"])
+                    last_point = point_dict
+                    
+            if not values or not last_point:
                 continue
-                
-            # Ponto de dado atual (último valor disponível)
-            last_point = trend.values[-1]
             
             # Calcula a tendência (variação percentual em relação à média)
             avg_value = sum(values) / len(values)
-            trend_value = ((last_point['value'] - avg_value) / avg_value * 100) if avg_value > 0 else 0
+            trend_value = ((last_point["value"] - avg_value) / avg_value * 100) if avg_value > 0 else 0
+            
+            # Tenta converter a data string para datetime, com fallback
+            try:
+                if isinstance(last_point["date"], str):
+                    last_date = datetime.fromisoformat(last_point["date"].replace('Z', '+00:00'))
+                else:
+                    last_date = datetime.now()
+            except (ValueError, AttributeError):
+                last_date = datetime.now()
             
             # Cria o ponto de dado atual
             current_value = DataPoint(
-                value=last_point['value'],
+                value=last_point["value"],
                 source=DataSource.GOOGLE_TRENDS,
-                timestamp=last_point['date'],
+                timestamp=last_date,
                 confidence=0.8,  # Confiança moderada para dados do Google Trends
                 quality=DataQualityLevel.MEDIUM,
                 meta_info={
@@ -197,6 +397,27 @@ class TrendsTransformer:
                 }
             )
             
+            # Cria pontos históricos
+            historical_values = []
+            for point_dict in trend.values:
+                if "date" in point_dict and "value" in point_dict:
+                    try:
+                        if isinstance(point_dict["date"], str):
+                            point_date = datetime.fromisoformat(point_dict["date"].replace('Z', '+00:00'))
+                        else:
+                            point_date = datetime.now()
+                    except (ValueError, AttributeError):
+                        point_date = datetime.now()
+                    
+                    historical_values.append(DataPoint(
+                        value=point_dict["value"],
+                        source=DataSource.GOOGLE_TRENDS,
+                        timestamp=point_date,
+                        confidence=0.8,
+                        quality=DataQualityLevel.MEDIUM,
+                        meta_info={'unidade': 'índice (0-100)', 'fonte': 'Google Trends'}
+                    ))
+            
             # Cria a métrica
             metric_name = f"tendencia_busca_{term.lower().replace(' ', '_')}"
             metrics[metric_name] = MarketMetric(
@@ -204,17 +425,7 @@ class TrendsTransformer:
                 description=f"Interesse de busca no Google pelo termo '{term}'",
                 unit="índice (0-100)",
                 current_value=current_value,
-                historical_values=[
-                    DataPoint(
-                        value=point['value'],
-                        source=DataSource.GOOGLE_TRENDS,
-                        timestamp=point['date'],
-                        confidence=0.8,
-                        quality=DataQualityLevel.MEDIUM,
-                        meta_info={'unidade': 'índice (0-100)', 'fonte': 'Google Trends'}
-                    )
-                    for point in trend.values
-                ],
+                historical_values=historical_values,
                 trend=trend_value
             )
         

@@ -156,11 +156,23 @@ class IBGETransformer:
                 market_metrics = {}
                 
                 for metric_name, metric_data in metrics.items():
+                    # Trata timestamp inválido
+                    timestamp_str = metric_data.get('timestamp', '')
+                    if not timestamp_str or len(timestamp_str) < 4:
+                        # Usa ano atual se timestamp inválido
+                        timestamp = datetime.now().replace(month=1, day=1)
+                    else:
+                        try:
+                            timestamp = datetime.strptime(timestamp_str, '%Y%m')
+                        except ValueError:
+                            # Fallback para ano atual
+                            timestamp = datetime.now().replace(month=1, day=1)
+                    
                     # Cria o ponto de dado atual
                     current_value = DataPoint(
                         value=metric_data['value'],
                         source=DataSource.IBGE_SIDRA,
-                        timestamp=datetime.strptime(metric_data['timestamp'], '%Y%m'),
+                        timestamp=timestamp,
                         confidence=0.9,  # Alto nível de confiança para dados do IBGE
                         quality=DataQualityLevel.HIGH,
                         meta_info={

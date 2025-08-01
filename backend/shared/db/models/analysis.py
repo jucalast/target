@@ -16,6 +16,7 @@ class Analysis(Base):
         niche: The niche being analyzed
         description: Description of the analysis
         normalized_text: Normalized text for NLP processing
+        status: Current status of the analysis (pending, processing, completed, failed, etc.)
         keywords: Extracted keywords as JSON
         entities: Extracted named entities as JSON
         embedding: Vector embedding of the analysis text
@@ -30,6 +31,7 @@ class Analysis(Base):
     niche = Column(String(100), nullable=False)
     description = Column(Text, nullable=False)
     normalized_text = Column(Text, nullable=False)
+    status = Column(String(50), nullable=False, default="pending")
 
     keywords = Column(JSON, nullable=False)
     entities = Column(JSON, nullable=False)

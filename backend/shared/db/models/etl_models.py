@@ -11,6 +11,7 @@ from enum import Enum
 
 from sqlalchemy import Column, String, JSON, DateTime, Float, Integer, ForeignKey, Table, Text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy import JSON
 from sqlalchemy.orm import relationship, declarative_base
 
 from shared.db.postgres import Base
@@ -74,9 +75,9 @@ class MarketMetricModel(Base):
     segment_id = Column(PG_UUID(as_uuid=True), ForeignKey('market_segments.id'), nullable=False)
     current_value_id = Column(PG_UUID(as_uuid=True), ForeignKey('data_points.id'), nullable=True)
     
-    # Relacionamentos
+    # Relacionamentos - especificando foreign_keys para evitar ambiguidade
     current_value = relationship("DataPointModel", foreign_keys=[current_value_id], uselist=False)
-    historical_values = relationship("DataPointModel", backref="metric")
+    historical_values = relationship("DataPointModel", foreign_keys="DataPointModel.metric_id", backref="metric")
     
     def __repr__(self):
         return f"<MarketMetric(id={self.id}, name={self.name}, segment_id={self.segment_id})>"

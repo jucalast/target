@@ -5,7 +5,6 @@ Este pacote contém todos os modelos SQLAlchemy usados na aplicação.
 """
 from .user import User
 from .analysis import Analysis
-from .analysis_request import AnalysisRequest
 from .etl_models import (
     ETLResultModel,
     MarketSegmentModel,
@@ -22,7 +21,6 @@ from .etl_models import (
 __all__ = [
     'User',
     'Analysis',
-    'AnalysisRequest',
     'ETLResultModel',
     'MarketSegmentModel',
     'MarketMetricModel',

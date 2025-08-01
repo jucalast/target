@@ -52,6 +52,28 @@ logger = logging.getLogger(__name__)
 DEFAULT_CACHE_DIR = Path(".cache/sidra")
 DEFAULT_CACHE_TTL_DAYS = 7
 
+# Cache TTL inteligente baseado no tipo de dados (em dias)
+INTELLIGENT_CACHE_TTL = {
+    'demographic': 30,      # dados demográficos: 30 dias
+    'economic': 7,          # dados econômicos: 7 dias  
+    'survey': 90,           # dados de pesquisa: 90 dias
+    'census': 365,          # dados do censo: 1 ano
+    'metadata': 1,          # metadados: 1 dia
+    'default': 7            # padrão: 7 dias
+}
+
+# Limites oficiais da API SIDRA
+MAX_VALUES_PER_REQUEST = 100_000
+MAX_DIMENSIONS = 9
+
+# Tabelas que requerem parâmetros específicos
+SPECIAL_TABLE_CONFIGS = {
+    '6401': {'territorial_level': '1', 'note': 'PNAD Contínua - Brasil apenas'},
+    '6402': {'territorial_level': '1', 'note': 'PNAD Contínua - Brasil apenas'},
+    '6403': {'territorial_level': '1', 'note': 'PNAD Contínua - Brasil apenas'},
+    '5918': {'territorial_level': '3', 'note': 'Municípios - requer nível N3 ou superior'}
+}
+
 class IBGEDataSource(str, Enum):
     """Fontes de dados do IBGE que possuem tabelas mapeadas."""
     POF = "POF"        # Pesquisa de Orçamentos Familiares
@@ -209,9 +231,10 @@ class SIDRAClient:
         max_retries: Optional[int] = None,
         retry_wait_min: Optional[int] = None,
         retry_wait_max: Optional[int] = None,
+        enable_intelligent_cache: bool = True
     ):
         """
-        Inicializa o cliente SIDRA.
+        Inicializa o cliente SIDRA com melhores práticas.
 
         Args:
             cache_enabled: Se True, ativa o cache de respostas em arquivos Parquet.
@@ -220,9 +243,11 @@ class SIDRAClient:
             max_retries: Número máximo de tentativas para requisições à API.
             retry_wait_min: Tempo mínimo de espera entre tentativas (em segundos).
             retry_wait_max: Tempo máximo de espera entre tentativas (em segundos).
+            enable_intelligent_cache: Se True, usa TTL inteligente baseado no tipo de dados.
         """
         self.cache_enabled = cache_enabled
         self.cache_ttl = timedelta(days=cache_ttl_days)
+        self.enable_intelligent_cache = enable_intelligent_cache
         self.mapper = SIDRAMapper()
         
         # Configuração de novas tentativas
@@ -235,6 +260,12 @@ class SIDRAClient:
         self.metadata_cache = {}
         self.last_metadata_update = 0
         
+        # Métricas de performance
+        self.request_count = 0
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self.total_data_points = 0
+        
         if self.cache_enabled:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"Cache SIDRA ativado em: {self.cache_dir.resolve()}")
@@ -243,27 +274,148 @@ class SIDRAClient:
             self.metadata_cache_dir = self.cache_dir / "metadata"
             self.metadata_cache_dir.mkdir(exist_ok=True)
 
-    def _get_cache_key(self, query: SIDRAQueryParams) -> str:
+    def _get_intelligent_cache_ttl(self, table_code: str) -> timedelta:
+        """
+        Determina o TTL do cache baseado no tipo de dados da tabela.
+        
+        Args:
+            table_code: Código da tabela SIDRA
+            
+        Returns:
+            TTL apropriado para o tipo de dados
+        """
+        if not self.enable_intelligent_cache:
+            return self.cache_ttl
+        
+        # Mapeamento de tabelas para tipos de dados
+        table_types = {
+            # Dados demográficos (PNAD, Censo)
+            'demographic': ['6407', '6408', '6409', '9514', '3175'],
+            # Dados econômicos (PIB, Inflação, Emprego)
+            'economic': ['5932', '1612', '6381', '6468'],
+            # Dados de pesquisa (POF, PME)
+            'survey': ['7482', '7483', '7484'],
+            # Dados do censo (menos frequentes)
+            'census': ['9514', '3175', '200']
+        }
+        
+        # Determina o tipo baseado no código da tabela
+        data_type = 'default'
+        for type_name, table_list in table_types.items():
+            if table_code in table_list:
+                data_type = type_name
+                break
+        
+        ttl_days = INTELLIGENT_CACHE_TTL.get(data_type, INTELLIGENT_CACHE_TTL['default'])
+        return timedelta(days=ttl_days)
+    
+    def _estimate_request_size(self, query: SIDRAQueryParams) -> int:
+        """
+        Estima o número de valores que serão retornados pela consulta.
+        
+        Args:
+            query: Parâmetros da consulta
+            
+        Returns:
+            Estimativa do número de valores
+        """
+        try:
+            # Valores base
+            variables_count = len(query.variables) if query.variables else 1
+            periods_count = 1  # Simplificado - pode ser expandido
+            
+            # Estimativa de territórios
+            if query.location:
+                territories_count = 1
+            elif query.ibge_territorial_code == "all":
+                # Estimativas baseadas no nível territorial
+                level_estimates = {'1': 1, '2': 5, '3': 27, '6': 5570}
+                territories_count = level_estimates.get(query.territorial_level or '1', 1)
+            else:
+                territories_count = 1
+            
+            # Estimativa de classificações
+            classifications_count = 1
+            if query.classifications:
+                for value in query.classifications.values():
+                    if isinstance(value, list):
+                        classifications_count *= len(value)
+                    elif value == 'all':
+                        classifications_count *= 10  # Estimativa conservadora
+            
+            estimated_size = variables_count * periods_count * territories_count * classifications_count
+            
+            # Log warning se estimativa exceder o limite
+            if estimated_size > MAX_VALUES_PER_REQUEST:
+                logger.warning(
+                    f"Consulta pode exceder limite de {MAX_VALUES_PER_REQUEST:,} valores. "
+                    f"Estimativa: {estimated_size:,} valores"
+                )
+            
+            return estimated_size
+            
+        except Exception as e:
+            logger.warning(f"Erro ao estimar tamanho da consulta: {e}")
+            return 1000  # Estimativa conservadora
+    
+    def _validate_table_constraints(self, query: SIDRAQueryParams) -> SIDRAQueryParams:
+        """
+        Valida e ajusta parâmetros baseado em restrições específicas das tabelas.
+        
+        Args:
+            query: Parâmetros da consulta original
+            
+        Returns:
+            Parâmetros ajustados conforme as restrições
+        """
+        table_code = str(query.table_code)
+        
+        # Verifica se a tabela tem configurações especiais
+        if table_code in SPECIAL_TABLE_CONFIGS:
+            config = SPECIAL_TABLE_CONFIGS[table_code]
+            
+            # Força nível territorial específico se necessário
+            if 'territorial_level' in config:
+                required_level = config['territorial_level']
+                if query.territorial_level and query.territorial_level != required_level:
+                    logger.warning(
+                        f"Tabela {table_code} requer nível territorial {required_level}. "
+                        f"Ajustando de {query.territorial_level} para {required_level}. "
+                        f"Nota: {config.get('note', '')}"
+                    )
+                
+                # Cria nova query com parâmetros ajustados
+                query_dict = query.model_dump()
+                query_dict['territorial_level'] = required_level
+                if required_level == '1':  # Brasil apenas
+                    query_dict['ibge_territorial_code'] = '1'
+                    query_dict['location'] = 'Brasil'
+                
+                query = SIDRAQueryParams(**query_dict)
+        
+        return query
         """Gera uma chave de cache única e determinística para uma consulta."""
         # Usa model_dump() com json.dumps para compatibilidade com Pydantic v2
         query_dict = query.model_dump()
         query_str = json.dumps(query_dict, sort_keys=True)
         return hashlib.md5(query_str.encode('utf-8')).hexdigest()
 
-    def _get_from_cache(self, key: str) -> Optional[pd.DataFrame]:
+    def _get_from_cache(self, key: str, table_id: str = None) -> Optional[pd.DataFrame]:
         """
-        Carrega um DataFrame do cache se o arquivo existir e for válido.
+        Carrega um DataFrame do cache se o arquivo existir e for válido, usando TTL inteligente.
 
         Args:
             key: Chave de cache gerada por _get_cache_key.
+            table_id: ID da tabela para calcular TTL inteligente.
 
         Returns:
-            DataFrame com os dados em cache ou None se não existir ou for inválido.
+            DataFrame com os dados em cache ou None se não existir ou ser inválido.
 
         Raises:
             SidraApiError: Se ocorrer um erro ao carregar os dados do cache.
         """
         if not self.cache_enabled:
+            self.cache_metrics['cache_disabled_calls'] += 1
             return None
 
         cache_file = self.cache_dir / f"{key}.parquet"
@@ -271,12 +423,24 @@ class SIDRAClient:
         try:
             if not cache_file.exists():
                 logger.debug(f"Arquivo de cache não encontrado: {cache_file}")
+                self.cache_metrics['cache_misses'] += 1
                 return None
 
-            # Verifica se o cache está expirado
+            # Calcula TTL inteligente baseado no tipo de dados da tabela
+            intelligent_ttl = self._get_intelligent_cache_ttl(table_id) if table_id else self.cache_ttl
+            
+            # Verifica se o cache está expirado usando TTL inteligente
             file_mtime = datetime.fromtimestamp(cache_file.stat().st_mtime)
-            if datetime.now() - file_mtime > self.cache_ttl:
-                logger.debug(f"Cache expirado para a chave: {key}")
+            cache_age = datetime.now() - file_mtime
+            
+            if cache_age > intelligent_ttl:
+                logger.debug(f"Cache expirado para a chave: {key} (idade: {cache_age}, TTL: {intelligent_ttl})")
+                self.cache_metrics['cache_expired'] += 1
+                # Remove arquivo expirado
+                try:
+                    cache_file.unlink()
+                except OSError:
+                    pass
                 return None
 
             # Carrega os dados do arquivo Parquet
@@ -285,14 +449,21 @@ class SIDRAClient:
             # Verifica se o DataFrame está vazio
             if df.empty:
                 logger.warning(f"Arquivo de cache vazio: {cache_file}")
+                self.cache_metrics['cache_empty'] += 1
                 return None
                 
-            logger.debug(f"Dados carregados do cache: {key} (tamanho: {len(df)} linhas)")
+            # Cache hit bem-sucedido
+            self.cache_metrics['cache_hits'] += 1
+            self.cache_metrics['total_data_from_cache'] += len(df)
+            
+            cache_age_hours = cache_age.total_seconds() / 3600
+            logger.info(f"Cache HIT: {key} (idade: {cache_age_hours:.1f}h, {len(df)} linhas)")
             return df
 
         except Exception as e:
             error_msg = f"Erro ao carregar dados do cache {cache_file}: {str(e)}"
             logger.error(error_msg, exc_info=True)
+            self.cache_metrics['cache_errors'] += 1
             raise SidraApiError(
                 message=error_msg,
                 original_error=e
@@ -310,10 +481,12 @@ class SIDRAClient:
             SidraApiError: Se ocorrer um erro ao salvar os dados no cache.
         """
         if not self.cache_enabled:
+            self.cache_metrics['cache_disabled_calls'] += 1
             return
             
         if df is None or df.empty:
             logger.warning("Tentativa de salvar DataFrame vazio ou nulo no cache")
+            self.cache_metrics['cache_empty_saves'] += 1
             return
 
         cache_file = self.cache_dir / f"{key}.parquet"
@@ -339,14 +512,20 @@ class SIDRAClient:
             with open(metadata_file, 'w', encoding='utf-8') as f:
                 json.dump(metadata, f, ensure_ascii=False, indent=2)
             
-            logger.debug(
-                f"Dados salvos no cache: {key} "
-                f"(tamanho: {len(df)} linhas, {len(df.columns)} colunas)"
+            # Atualiza métricas de cache
+            self.cache_metrics['cache_saves'] += 1
+            self.cache_metrics['total_data_cached'] += len(df)
+            
+            logger.info(
+                f"Cache SAVE: {key} "
+                f"({len(df)} linhas, {len(df.columns)} colunas, {cache_file.stat().st_size / 1024:.1f}KB)"
             )
             
         except Exception as e:
             error_msg = f"Erro ao salvar dados no cache {cache_file}: {str(e)}"
             logger.error(error_msg, exc_info=True)
+            self.cache_metrics['cache_errors'] += 1
+            
             # Não interrompe o fluxo principal em caso de falha no cache
             try:
                 # Tenta remover arquivos parciais em caso de erro
@@ -373,9 +552,9 @@ class SIDRAClient:
         """
         Obtém dados da API SIDRA com base nos parâmetros fornecidos.
         
-        Este método implementa um padrão de resiliência com cache, novas tentativas
-        e tratamento de erros robusto. Os dados são armazenados em cache local para
-        melhor desempenho em consultas repetidas.
+        Este método implementa um padrão de resiliência com cache inteligente, novas tentativas
+        e tratamento de erros robusto. Os dados são armazenados em cache local com TTL
+        baseado no tipo de dados para melhor desempenho em consultas repetidas.
         
         Args:
             query: Parâmetros da consulta SIDRA.
@@ -389,24 +568,33 @@ class SIDRAClient:
         """
         # Valida os parâmetros da consulta
         try:
-            query = SIDRAQueryParams(**query.dict())
+            query = SIDRAQueryParams(**query.model_dump())
         except ValidationError as e:
             error_msg = f"Parâmetros de consulta inválidos: {str(e)}"
             logger.error(error_msg)
             raise ValueError(error_msg) from e
         
+        # Valida restrições da tabela
+        query = self._validate_table_constraints(query)
+        
+        # Estima tamanho da requisição
+        estimated_size = self._estimate_request_size(query)
+        if estimated_size > self.MAX_REQUEST_SIZE:
+            raise SidraApiError(
+                message=f"Requisição muito grande: {estimated_size} > {self.MAX_REQUEST_SIZE}",
+                error_code="REQUEST_TOO_LARGE"
+            )
+        
         # Gera chave de cache e verifica se os dados estão em cache
         cache_key = self._get_cache_key(query)
         try:
-            cached_df = self._get_from_cache(cache_key)
+            cached_df = self._get_from_cache(cache_key, str(query.table_code))
             if cached_df is not None:
                 logger.info(f"Dados recuperados do cache para a tabela {query.table_code}")
                 return cached_df
         except SidraApiError as e:
             logger.warning(f"Erro ao acessar cache, continuando sem cache: {e}")
             # Continua sem cache em caso de erro
-        
-        try:
             # Obtém informações da tabela
             table_info = self.mapper.get_table_info(query.table_code)
             if not table_info:
@@ -419,12 +607,17 @@ class SIDRAClient:
             params = self._prepare_sidra_params(query)
             logger.info(f"Fazendo requisição para a API SIDRA - Tabela {query.table_code}")
             
-            # Tenta com get_table, depois com get se falhar
-            try:
-                raw_data = sidrapy.get_table(**params)
-            except (AttributeError, ValueError):
-                params['table'] = params.pop('table_code')
-                raw_data = sidrapy.get(**params)
+            # Usa get_table do sidrapy com parâmetros corretos
+            raw_data = sidrapy.get_table(
+                table_code=str(query.table_code),
+                territorial_level=params['territorial_level'],
+                ibge_territorial_code=params['ibge_territorial_code'],
+                variable=params.get('variable'),
+                classifications=params.get('classifications'),
+                period=params.get('period', 'last'),
+                header='y',
+                format='list'
+            )
             
             # Processa e valida a resposta
             df = self._process_sidra_response(raw_data, str(query.table_code))
@@ -473,6 +666,9 @@ class SIDRAClient:
             SidraApiError: Se os parâmetros forem inválidos ou incompatíveis.
         """
         try:
+            # Tabelas que só suportam nível nacional (N1)
+            national_only_tables = ["6401", "6402", "6403"]  # PNAD Contínua e similares
+            
             # Resolve a localização se fornecida
             if query.location:
                 location_info = self.mapper.get_location_info(query.location)
@@ -481,17 +677,23 @@ class SIDRAClient:
                         message=f"Localização não encontrada: '{query.location}'",
                         error_code="LOCATION_NOT_FOUND"
                     )
-                territorial_level = location_info['level']
-                ibge_territorial_code = location_info['code']
+                # Força nível nacional para tabelas específicas
+                if str(query.table_code) in national_only_tables:
+                    territorial_level = "1"  # Sempre nível nacional
+                    ibge_territorial_code = "1"  # Brasil
+                    logger.warning(f"Tabela {query.table_code} só suporta nível nacional. Forçando N1/Brasil.")
+                else:
+                    territorial_level = location_info['level']
+                    ibge_territorial_code = location_info['code']
             else:
                 territorial_level = query.territorial_level or "1"
                 ibge_territorial_code = query.ibge_territorial_code or "all"
             
             # Prepara as variáveis
             variables = []
-            if query.variables:
+            if query.variables and len(query.variables) > 0:
                 for var in query.variables:
-                    if isinstance(var, (int, str)):
+                    if isinstance(var, (int, str)) and str(var).strip():
                         variables.append(str(var))
                     else:
                         raise SidraApiError(
@@ -522,7 +724,7 @@ class SIDRAClient:
             }
             
             # Adiciona variáveis se fornecidas
-            if variables:
+            if variables and len(variables) > 0:
                 params['variable'] = ','.join(variables)
             
             # Adiciona as classificações se fornecidas
@@ -608,6 +810,45 @@ class SIDRAClient:
                 error_code="DATA_PROCESSING_ERROR"
             ) from e
 
+    def get_cache_metrics(self) -> Dict[str, Any]:
+        """
+        Retorna métricas detalhadas do sistema de cache.
+        
+        Returns:
+            Dicionário com estatísticas de performance do cache.
+        """
+        total_requests = (self.cache_metrics['cache_hits'] + 
+                         self.cache_metrics['cache_misses'] + 
+                         self.cache_metrics['cache_expired'])
+        
+        hit_rate = (self.cache_metrics['cache_hits'] / total_requests * 100 
+                   if total_requests > 0 else 0)
+        
+        cache_efficiency = {
+            'hit_rate_percent': round(hit_rate, 2),
+            'total_requests': total_requests,
+            'cache_hits': self.cache_metrics['cache_hits'],
+            'cache_misses': self.cache_metrics['cache_misses'],
+            'cache_expired': self.cache_metrics['cache_expired'],
+            'cache_errors': self.cache_metrics['cache_errors'],
+            'cache_saves': self.cache_metrics['cache_saves'],
+            'cache_empty_saves': self.cache_metrics['cache_empty_saves'],
+            'cache_disabled_calls': self.cache_metrics['cache_disabled_calls'],
+            'total_data_cached': self.cache_metrics['total_data_cached'],
+            'total_data_from_cache': self.cache_metrics['total_data_from_cache'],
+            'cache_enabled': self.cache_enabled,
+            'cache_dir': str(self.cache_dir),
+            'default_ttl_hours': self.cache_ttl.total_seconds() / 3600
+        }
+        
+        # Adiciona informações sobre TTL inteligente
+        cache_efficiency['intelligent_ttl_mapping'] = {
+            data_type: ttl.total_seconds() / 3600 
+            for data_type, ttl in self.INTELLIGENT_CACHE_TTL.items()
+        }
+        
+        return cache_efficiency
+
 
 class SIDRAService:
     """
@@ -622,6 +863,64 @@ class SIDRAService:
             client: Uma instância de SIDRAClient. Se não for fornecida, uma nova será criada.
         """
         self.client = client or SIDRAClient()
+
+    def get_table(
+        self,
+        table_code: str,
+        variables: List[str] = None,
+        classifications: Dict[str, Union[str, List[str]]] = None,
+        location: str = "Brasil",
+        period: str = "last"
+    ) -> Dict[str, Any]:
+        """
+        Método de conveniência para obter dados de uma tabela SIDRA.
+        
+        Args:
+            table_code: Código da tabela SIDRA
+            variables: Lista de códigos de variáveis
+            classifications: Dicionário de classificações
+            location: Localização (padrão: "Brasil")
+            period: Período (padrão: "last")
+            
+        Returns:
+            Dicionário com os dados da tabela
+        """
+        try:
+            logger.info(f"Obtendo dados da tabela SIDRA {table_code} para {location}")
+            
+            # Cria query para o SIDRAClient
+            query = SIDRAQueryParams(
+                table_code=table_code,
+                variables=variables or [],  # Lista vazia em vez de ["all"]
+                classifications=classifications or {},
+                location=location,
+                period=period
+            )
+            
+            # Obtem os dados do client
+            df = self.client.get_table(query)
+            
+            if df is not None and not df.empty:
+                # Converte para formato dicionário
+                result = {
+                    'value': df.to_dict(orient='records'),
+                    'metadata': {
+                        'table_code': table_code,
+                        'location': location,
+                        'period': period,
+                        'records_count': len(df)
+                    }
+                }
+                logger.info(f"Dados obtidos com sucesso: {len(df)} registros")
+                return result
+            else:
+                logger.warning(f"Nenhum dado retornado para tabela {table_code}")
+                return {'value': [], 'metadata': {'table_code': table_code, 'records_count': 0}}
+                
+        except Exception as e:
+            logger.error(f"Erro ao obter dados da tabela {table_code}: {str(e)}", exc_info=True)
+            # Retorna estrutura vazia em caso de erro
+            return {'value': [], 'metadata': {'table_code': table_code, 'error': str(e)}}
 
     def get_population_by_sex_and_age(
         self, 

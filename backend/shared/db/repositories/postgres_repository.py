@@ -68,7 +68,7 @@ class BasePostgresRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaTy
         """
         try:
             # Converte o schema Pydantic para dicionário
-            obj_data = obj_in.dict() if hasattr(obj_in, 'dict') else dict(obj_in)
+            obj_data = obj_in.model_dump() if hasattr(obj_in, 'model_dump') else (obj_in.dict() if hasattr(obj_in, 'dict') else dict(obj_in))
             # Atualiza com argumentos adicionais
             obj_data.update(kwargs)
 
@@ -181,7 +181,7 @@ class BasePostgresRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaTy
 
             # Converte para dicionário se for um modelo Pydantic
             if hasattr(obj_in, 'dict'):
-                update_data = obj_in.dict(exclude_unset=exclude_unset)
+                update_data = obj_in.model_dump(exclude_unset=exclude_unset) if hasattr(obj_in, 'model_dump') else obj_in.dict(exclude_unset=exclude_unset)
             else:
                 update_data = dict(obj_in)
 

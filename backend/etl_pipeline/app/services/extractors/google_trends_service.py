@@ -3,24 +3,96 @@ Google Trends Service
 
 This service provides functionality to collect search interest data from Google Trends.
 It's designed to be used as a supplementary data source for market analysis.
+
+Implements best practices for Google Trends API:
+- Intelligent rate limiting with 60s delay after 429 errors
+- Exponential backoff with circuit breaker
+- Optimized timeouts and connection management
+- Request batching and caching strategies
 """
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 import time
 import random
 import pandas as pd
 from pytrends.request import TrendReq
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from requests.exceptions import RequestException, HTTPError, Timeout
 
 logger = logging.getLogger(__name__)
 
-class GoogleTrendsService:
-    """Service for collecting and processing Google Trends data."""
+class CircuitBreaker:
+    """Circuit breaker implementation for API resilience."""
     
-    def __init__(self, hl: str = 'pt-BR', tz: int = 180, timeout: int = (10, 25)):
+    def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 300):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
+    
+    def call(self, func, *args, **kwargs):
+        """Execute function with circuit breaker protection."""
+        if self.state == 'OPEN':
+            if self._should_attempt_reset():
+                self.state = 'HALF_OPEN'
+            else:
+                raise Exception("Circuit breaker is OPEN")
+        
+        try:
+            result = func(*args, **kwargs)
+            if self.state == 'HALF_OPEN':
+                self._reset()
+            return result
+        except Exception as e:
+            self._record_failure()
+            raise e
+    
+    def _should_attempt_reset(self) -> bool:
+        """Check if enough time has passed to attempt reset."""
+        return (
+            self.last_failure_time and
+            time.time() - self.last_failure_time >= self.recovery_timeout
+        )
+    
+    def _record_failure(self):
+        """Record a failure and update circuit state."""
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = 'OPEN'
+            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+    
+    def _reset(self):
+        """Reset circuit breaker to closed state."""
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = 'CLOSED'
+        logger.info("Circuit breaker reset to CLOSED state")
+
+class GoogleTrendsService:
+    """
+    Service for collecting and processing Google Trends data with best practices.
+    
+    Features:
+    - Intelligent rate limiting (60s delay after 429 errors)
+    - Circuit breaker for consecutive failures
+    - Exponential backoff with jitter
+    - Connection pooling and reuse
+    - Request metrics and monitoring
+    """
+    
+    # Rate limiting configuration
+    RATE_LIMIT_DELAY = 60  # seconds after 429 error
+    NORMAL_DELAY_RANGE = (2, 5)  # random delay between normal requests
+    MAX_RETRIES = 3
+    BACKOFF_FACTOR = 0.1
+    
+    def __init__(self, hl: str = 'pt-BR', tz: int = 180, timeout: Tuple[int, int] = (10, 25)):
         """
-        Initialize the Google Trends service.
+        Initialize the Google Trends service with best practices.
         
         Args:
             hl: Language (default: 'pt-BR' for Brazilian Portuguese)
@@ -31,17 +103,20 @@ class GoogleTrendsService:
         self.tz = tz
         self.timeout = timeout
         self.pytrends = None
+        self.circuit_breaker = CircuitBreaker()
+        self.last_request_time = 0
+        self.rate_limited_until = 0
+        self.request_count = 0
+        self.success_count = 0
         self._connect()
-        
     def _connect(self) -> None:
-        """Establish a connection to Google Trends."""
+        """Establish a connection to Google Trends with optimized settings."""
         try:
+            # Create TrendReq with minimal configuration to avoid compatibility issues
             self.pytrends = TrendReq(
                 hl=self.hl,
                 tz=self.tz,
-                timeout=self.timeout,
-                retries=2,
-                backoff_factor=0.1,
+                timeout=self.timeout[1],  # Use only read timeout
                 requests_args={'verify': False}
             )
             logger.info("Successfully connected to Google Trends")
@@ -49,20 +124,68 @@ class GoogleTrendsService:
             logger.error(f"Failed to connect to Google Trends: {str(e)}")
             raise
     
+    def _wait_for_rate_limit(self) -> None:
+        """Implement intelligent rate limiting."""
+        current_time = time.time()
+        
+        # Check if we're in a rate limit period
+        if current_time < self.rate_limited_until:
+            wait_time = self.rate_limited_until - current_time
+            logger.warning(f"Rate limited. Waiting {wait_time:.1f} seconds...")
+            time.sleep(wait_time)
+        
+        # Normal delay between requests
+        time_since_last = current_time - self.last_request_time
+        min_delay = random.uniform(*self.NORMAL_DELAY_RANGE)
+        
+        if time_since_last < min_delay:
+            wait_time = min_delay - time_since_last
+            logger.debug(f"Normal delay: waiting {wait_time:.1f} seconds")
+            time.sleep(wait_time)
+        
+        self.last_request_time = time.time()
+    
+    def _handle_rate_limit_error(self, error: Exception) -> None:
+        """Handle 429 rate limit errors with appropriate delays."""
+        if "429" in str(error) or "rate limit" in str(error).lower():
+            self.rate_limited_until = time.time() + self.RATE_LIMIT_DELAY
+            logger.warning(f"Rate limit hit. Backing off for {self.RATE_LIMIT_DELAY} seconds")
+        else:
+            # For other errors, shorter backoff
+            backoff_time = min(30, 2 ** (self.request_count % 5))
+            self.rate_limited_until = time.time() + backoff_time
+            logger.warning(f"API error. Backing off for {backoff_time} seconds")
+    
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((RequestException, HTTPError, Timeout)),
         reraise=True
     )
     def _make_request(self, func, *args, **kwargs):
-        """Make a request with retry logic and rate limiting."""
+        """Make a request with comprehensive error handling and rate limiting."""
+        self.request_count += 1
+        
         try:
-            # Add random delay to avoid hitting rate limits
-            time.sleep(random.uniform(1, 3))
-            return func(*args, **kwargs)
+            # Wait for rate limiting
+            self._wait_for_rate_limit()
+            
+            # Execute request with circuit breaker
+            result = self.circuit_breaker.call(func, *args, **kwargs)
+            self.success_count += 1
+            
+            logger.debug(f"Request successful. Success rate: {self.success_count/self.request_count:.2%}")
+            return result
+            
         except Exception as e:
             logger.warning(f"Request failed: {str(e)}. Retrying...")
-            self._connect()  # Reconnect before retrying
+            self._handle_rate_limit_error(e)
+            
+            # Reconnect on certain errors
+            if any(keyword in str(e).lower() for keyword in ['connection', 'timeout', 'ssl']):
+                logger.info("Reconnecting due to connection error...")
+                self._connect()
+            
             raise
     
     def get_interest_over_time(
@@ -72,19 +195,17 @@ class GoogleTrendsService:
         geo: str = 'BR',
         gprop: str = 'web',
         cat: int = 0,
-        sleep: int = 0,
         **kwargs
     ) -> Dict[str, Any]:
         """
-        Get interest over time for the given keywords.
+        Get interest over time for the given keywords with best practices.
         
         Args:
-            keywords: List of search terms
+            keywords: List of search terms (max 5 per Google Trends limitation)
             timeframe: Time period for the data (e.g., 'today 12-m' for last 12 months)
             geo: Geographic location (default: 'BR' for Brazil)
             gprop: Google's property to filter on (web, news, images, froogle, youtube)
             cat: Category to narrow results (0 for all categories)
-            sleep: Seconds to wait between requests
             
         Returns:
             Dictionary containing the interest over time data and metadata
@@ -92,7 +213,13 @@ class GoogleTrendsService:
         if not keywords:
             return {'data': pd.DataFrame(), 'metadata': {'status': 'error', 'message': 'No keywords provided'}}
         
+        # Validate keyword limit
+        if len(keywords) > 5:
+            logger.warning(f"Too many keywords ({len(keywords)}). Limiting to first 5.")
+            keywords = keywords[:5]
+        
         logger.info(f"Fetching interest over time for keywords: {keywords}")
+        start_time = time.time()
         
         try:
             # Build the payload
@@ -109,9 +236,17 @@ class GoogleTrendsService:
             df = self._make_request(self.pytrends.interest_over_time)
             
             if df.empty:
-                return {'data': df, 'metadata': {'status': 'no_data', 'message': 'No data returned'}}
+                return {
+                    'data': df, 
+                    'metadata': {
+                        'status': 'no_data', 
+                        'message': 'No data returned',
+                        'keywords': keywords,
+                        'request_time': time.time() - start_time
+                    }
+                }
             
-            # Prepare the result
+            # Prepare the result with enhanced metadata
             result = {
                 'data': df.reset_index().to_dict('records'),
                 'metadata': {
@@ -121,14 +256,13 @@ class GoogleTrendsService:
                     'geo': geo,
                     'gprop': gprop,
                     'timestamp': datetime.utcnow().isoformat(),
-                    'data_points': len(df)
+                    'data_points': len(df),
+                    'request_time': time.time() - start_time,
+                    'success_rate': self.success_count / self.request_count if self.request_count > 0 else 0,
+                    'circuit_breaker_state': self.circuit_breaker.state
                 }
             }
             
-            # Add sleep if needed to avoid rate limiting
-            if sleep > 0:
-                time.sleep(sleep)
-                
             return result
             
         except Exception as e:
@@ -139,7 +273,9 @@ class GoogleTrendsService:
                     'status': 'error',
                     'message': str(e),
                     'keywords': keywords,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'request_time': time.time() - start_time,
+                    'circuit_breaker_state': self.circuit_breaker.state
                 }
             }
     
@@ -337,6 +473,48 @@ class GoogleTrendsService:
                 }
             }
     
+    def get_service_metrics(self) -> Dict[str, Any]:
+        """
+        Get comprehensive service metrics for monitoring and debugging.
+        
+        Returns:
+            Dictionary with performance and health metrics
+        """
+        return {
+            'requests': {
+                'total': self.request_count,
+                'successful': self.success_count,
+                'success_rate': self.success_count / self.request_count if self.request_count > 0 else 0,
+                'failed': self.request_count - self.success_count
+            },
+            'circuit_breaker': {
+                'state': self.circuit_breaker.state,
+                'failure_count': self.circuit_breaker.failure_count,
+                'last_failure': self.circuit_breaker.last_failure_time
+            },
+            'rate_limiting': {
+                'currently_rate_limited': time.time() < self.rate_limited_until,
+                'rate_limited_until': self.rate_limited_until,
+                'time_to_next_request': max(0, self.rate_limited_until - time.time())
+            },
+            'configuration': {
+                'language': self.hl,
+                'timezone': self.tz,
+                'timeout': self.timeout,
+                'rate_limit_delay': self.RATE_LIMIT_DELAY,
+                'normal_delay_range': self.NORMAL_DELAY_RANGE
+            },
+            'timestamp': datetime.utcnow().isoformat()
+        }
+    
+    def reset_metrics(self) -> None:
+        """Reset all metrics and circuit breaker state."""
+        self.request_count = 0
+        self.success_count = 0
+        self.circuit_breaker._reset()
+        self.rate_limited_until = 0
+        logger.info("Service metrics and circuit breaker reset")
+
     def get_today_searches(self, geo: str = 'BR') -> Dict[str, Any]:
         """
         Get today's trending searches.

@@ -84,7 +84,7 @@ class BaseRepository(ABC, Generic[T, T_ID]):
         if model is None:
             return None
             
-        data = model.dict(exclude_unset=exclude_unset)
+        data = model.model_dump(exclude_unset=exclude_unset) if hasattr(model, 'model_dump') else model.dict(exclude_unset=exclude_unset)
         
         # Remove o campo 'id' se existir e converter para _id se for um ObjectId
         if 'id' in data and data['id'] is not None:
