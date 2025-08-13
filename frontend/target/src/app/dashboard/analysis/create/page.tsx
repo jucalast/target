@@ -1,15 +1,20 @@
 'use client';
 
-import AdmissionForm from '@/components/analysis/AdmissionForm';
+import withAuth from '@/components/auth/withAuth';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import BusinessChatInterface from '@/components/analysis/BusinessChatInterface';
+
 function CreateAnalysisPage() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen home-background">
-      <div className="container px-4">
-        <AdmissionForm />
+    <DashboardLayout>
+      <div className="dashboard-container">
+        <div className="min-h-screen flex flex-col">
+          <BusinessChatInterface />
+        </div>
       </div>
-    </main>
+    </DashboardLayout>
   );
 }
 
-export default CreateAnalysisPage;
+export default withAuth(CreateAnalysisPage);
 

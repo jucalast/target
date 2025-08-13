@@ -3,7 +3,12 @@ import { useState } from "react";
 import Link from 'next/link';
 
 export default function RegisterUser() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ 
+    email: "", 
+    password: "", 
+    name: "", 
+    role: "user" 
+  });
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,7 +33,7 @@ export default function RegisterUser() {
         throw new Error(errorData.detail || "Erro ao registrar usuário");
       }
       setResult("Usuário registrado com sucesso!");
-      setForm({ email: "", password: "" }); // Limpa o formulário
+      setForm({ email: "", password: "", name: "", role: "user" }); // Limpa o formulário
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -43,6 +48,21 @@ export default function RegisterUser() {
           <h1 className="form-title">Registrar</h1>
           {result && <p className="success-message mb-4">{result}</p>}
           {error && <p className="error-message mb-4">{error}</p>}
+          <div className="mb-4">
+            <label htmlFor="name" className="form-label">
+              Nome
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value={form.name}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="Seu nome completo"
+              required
+            />
+          </div>
           <div className="mb-4">
             <label htmlFor="email" className="form-label">
               Email

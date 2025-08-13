@@ -15,6 +15,7 @@ class DataSource(str, Enum):
     GOOGLE_TRENDS = "google_trends"
     NEWS_SCRAPING = "news_scraping"
     NLP_PROCESSING = "nlp_processing"
+    INTERNAL_ANALYSIS = "internal_analysis"
 
 class DataQualityLevel(str, Enum):
     """Níveis de qualidade dos dados."""

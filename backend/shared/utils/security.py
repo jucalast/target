@@ -3,8 +3,11 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from jose import jwt
+from jose import JWTError, jwt
 from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 
 # Import from the config in the API Gateway module
 from api_gateway.app.core.config import settings
@@ -27,6 +30,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# OAuth2 scheme para extrair token do header Authorization
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -75,3 +81,49 @@ def get_password_hash(password: str) -> str:
     # senha e aplica o algoritmo de hash padrão (bcrypt). O resultado é uma
     # string única que contém todas as informações necessárias para a verificação.
     return pwd_context.hash(password)
+
+
+def decode_access_token(token: str) -> Optional[str]:
+    """
+    Decodifica um token JWT e retorna o email do usuário.
+    
+    Args:
+        token (str): O token JWT a ser decodificado.
+        
+    Returns:
+        Optional[str]: O email do usuário se o token for válido, None caso contrário.
+    """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        return email
+    except JWTError:
+        return None
+
+
+def get_current_user_email(token: str = Depends(oauth2_scheme)) -> str:
+    """
+    Dependência para obter o email do usuário atual a partir do token JWT.
+    
+    Args:
+        token (str): Token JWT extraído do header Authorization.
+        
+    Returns:
+        str: Email do usuário atual.
+        
+    Raises:
+        HTTPException: Se o token for inválido ou não contiver credenciais válidas.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    email = decode_access_token(token)
+    if email is None:
+        raise credentials_exception
+    
+    return email

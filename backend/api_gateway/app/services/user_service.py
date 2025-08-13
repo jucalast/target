@@ -49,6 +49,9 @@ def create_user(db: Session, user: user_schema.UserCreate) -> user_model.User:
     # para dicionário, o que torna este passo mais limpo.
     db_user = user_model.User(
         email=user.email,
+        name=user.name,
+        role=user.role,
+        avatar=user.avatar,
         hashed_password=hashed_password
     )
 

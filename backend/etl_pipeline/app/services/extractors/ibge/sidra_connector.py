@@ -223,6 +223,9 @@ class SIDRAClient:
     CACHE_VERSION = "1.0"
     METADATA_CACHE_TTL = 86400  # 24 horas em segundos
     
+    # Constante para controle de tamanho de requisição
+    MAX_REQUEST_SIZE = 100000  # Limite máximo estimado de registros por requisição
+    
     def __init__(
         self, 
         cache_enabled: bool = True, 
@@ -394,6 +397,8 @@ class SIDRAClient:
                 query = SIDRAQueryParams(**query_dict)
         
         return query
+    
+    def _get_cache_key(self, query: SIDRAQueryParams) -> str:
         """Gera uma chave de cache única e determinística para uma consulta."""
         # Usa model_dump() com json.dumps para compatibilidade com Pydantic v2
         query_dict = query.model_dump()

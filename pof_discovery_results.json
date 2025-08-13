@@ -1,0 +1,678 @@
+{
+  "working_tables": [
+    {
+      "code": "7482",
+      "name": "POF - Despesas familiares",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Condição de funcionamento da unidade de tratamento (Código)",
+          "D4N": "Condição de funcionamento da unidade de tratamento"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10886",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ETAs",
+          "D4C": "0",
+          "D4N": ""
+        }
+      ],
+      "total_records": 5
+    },
+    {
+      "code": "7483",
+      "name": "POF - Despesas alimentação",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Tipo de rede coletora de esgoto sanitário (Código)",
+          "D4N": "Tipo de rede coletora de esgoto sanitário"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10656",
+          "D3N": "Municípios com serviço de esgotamento sanitário por rede coletora em funcionamento",
+          "D4C": "0",
+          "D4N": ""
+        }
+      ],
+      "total_records": 3
+    },
+    {
+      "code": "7484",
+      "name": "POF - Despesas vestuário",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Duração do maior período de interrupção (Código)",
+          "D4N": "Duração do maior período de interrupção"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "2454",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10676",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ocorrência de interrupção de todos os sistemas de distribuição de alguma entidade por seis horas ou mais",
+          "D4C": "48677",
+          "D4N": "Total"
+        }
+      ],
+      "total_records": 2
+    },
+    {
+      "code": "7485",
+      "name": "POF - Despesas habitação",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Tipo de análise do efluente das ETEs (Código)",
+          "D4N": "Tipo de análise do efluente das ETEs"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10677",
+          "D3N": "Municípios com serviço de esgotamento sanitário por rede coletora em funcionamento e que fazem análise do efluente das ETEs",
+          "D4C": "48685",
+          "D4N": ""
+        }
+      ],
+      "total_records": 4
+    },
+    {
+      "code": "7486",
+      "name": "POF - Despesas transporte",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N",
+        "D5C",
+        "D5N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Existência e etapas do tratamento do lodo (Código)",
+          "D4N": "Existência e etapas do tratamento do lodo",
+          "D5C": "Destino do lodo gerado nas ETEs (Código)",
+          "D5N": "Destino do lodo gerado nas ETEs"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "1707",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10680",
+          "D3N": "Municípios com serviço de esgotamento sanitário por rede coletora em funcionamento e com geração de lodo no processo de tratamento de esgoto",
+          "D4C": "48692",
+          "D4N": "Total",
+          "D5C": "48700",
+          "D5N": "Total"
+        }
+      ],
+      "total_records": 2
+    },
+    {
+      "code": "7487",
+      "name": "POF - Despesas saúde",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Duração do maior período de racionamento (Código)",
+          "D4N": "Duração do maior período de racionamento"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "1146",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10683",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ocorrência de racionamento da água distribuída",
+          "D4C": "48726",
+          "D4N": "Total"
+        }
+      ],
+      "total_records": 2
+    },
+    {
+      "code": "7488",
+      "name": "POF - Despesas educação",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N",
+        "D5C",
+        "D5N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Existência e mês de racionamento sazonal (Código)",
+          "D4N": "Existência e mês de racionamento sazonal",
+          "D5C": "Existência de racionamento nos últimos 3 anos (Código)",
+          "D5N": "Existência de racionamento nos últimos 3 anos"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "5517",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10485",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento",
+          "D4C": "48744",
+          "D4N": "Total",
+          "D5C": "49182",
+          "D5N": "Total"
+        }
+      ],
+      "total_records": 2
+    },
+    {
+      "code": "9052",
+      "name": "POF - Avaliação vida",
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample_data": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Cor ou raça (Código)",
+          "D4N": "Cor ou raça"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1572",
+          "MN": "Mil pessoas",
+          "V": "18580",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2022",
+          "D2N": "2022",
+          "D3C": "12785",
+          "D3N": "Pessoas de 2 anos ou mais de idade com deficiência",
+          "D4C": "95251",
+          "D4N": "Total"
+        }
+      ],
+      "total_records": 5
+    }
+  ],
+  "query_tests": {
+    "Consulta básica": {
+      "success": true,
+      "records": 5,
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Condição de funcionamento da unidade de tratamento (Código)",
+          "D4N": "Condição de funcionamento da unidade de tratamento"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10886",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ETAs",
+          "D4C": "0",
+          "D4N": ""
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10887",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com UTSs",
+          "D4C": "0",
+          "D4N": ""
+        }
+      ]
+    },
+    "Com período específico": {
+      "success": true,
+      "records": 5,
+      "columns": [
+        "NC",
+        "NN",
+        "MC",
+        "MN",
+        "V",
+        "D1C",
+        "D1N",
+        "D2C",
+        "D2N",
+        "D3C",
+        "D3N",
+        "D4C",
+        "D4N"
+      ],
+      "sample": [
+        {
+          "NC": "Nível Territorial (Código)",
+          "NN": "Nível Territorial",
+          "MC": "Unidade de Medida (Código)",
+          "MN": "Unidade de Medida",
+          "V": "Valor",
+          "D1C": "Brasil (Código)",
+          "D1N": "Brasil",
+          "D2C": "Ano (Código)",
+          "D2N": "Ano",
+          "D3C": "Variável (Código)",
+          "D3N": "Variável",
+          "D4C": "Condição de funcionamento da unidade de tratamento (Código)",
+          "D4N": "Condição de funcionamento da unidade de tratamento"
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10886",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ETAs",
+          "D4C": "0",
+          "D4N": ""
+        },
+        {
+          "NC": "1",
+          "NN": "Brasil",
+          "MC": "1020",
+          "MN": "Unidades",
+          "V": "..",
+          "D1C": "1",
+          "D1N": "Brasil",
+          "D2C": "2017",
+          "D2N": "2017",
+          "D3C": "10887",
+          "D3N": "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com UTSs",
+          "D4C": "0",
+          "D4N": ""
+        }
+      ]
+    }
+  },
+  "table_structure": {
+    "NC": {
+      "unique_count": 2,
+      "sample_values": [
+        "Nível Territorial (Código)",
+        "1"
+      ],
+      "data_type": "object"
+    },
+    "NN": {
+      "unique_count": 2,
+      "sample_values": [
+        "Nível Territorial",
+        "Brasil"
+      ],
+      "data_type": "object"
+    },
+    "MC": {
+      "unique_count": 2,
+      "sample_values": [
+        "Unidade de Medida (Código)",
+        "1020"
+      ],
+      "data_type": "object"
+    },
+    "MN": {
+      "unique_count": 2,
+      "sample_values": [
+        "Unidade de Medida",
+        "Unidades"
+      ],
+      "data_type": "object"
+    },
+    "V": {
+      "unique_count": 2,
+      "sample_values": [
+        "Valor",
+        ".."
+      ],
+      "data_type": "object"
+    },
+    "D1C": {
+      "unique_count": 2,
+      "sample_values": [
+        "Brasil (Código)",
+        "1"
+      ],
+      "data_type": "object"
+    },
+    "D1N": {
+      "unique_count": 1,
+      "sample_values": [
+        "Brasil"
+      ],
+      "data_type": "object"
+    },
+    "D2C": {
+      "unique_count": 2,
+      "sample_values": [
+        "Ano (Código)",
+        "2017"
+      ],
+      "data_type": "object"
+    },
+    "D2N": {
+      "unique_count": 2,
+      "sample_values": [
+        "Ano",
+        "2017"
+      ],
+      "data_type": "object"
+    },
+    "D3C": {
+      "unique_count": 5,
+      "sample_values": [
+        "Variável (Código)",
+        "10886",
+        "10887",
+        "10888",
+        "10889"
+      ],
+      "data_type": "object"
+    },
+    "D3N": {
+      "unique_count": 5,
+      "sample_values": [
+        "Variável",
+        "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com ETAs",
+        "Municípios com serviço de abastecimento de água por rede geral de distribuição em funcionamento e com UTSs",
+        "Número de ETAs",
+        "Número de UTSs"
+      ],
+      "data_type": "object"
+    },
+    "D4C": {
+      "unique_count": 2,
+      "sample_values": [
+        "Condição de funcionamento da unidade de tratamento (Código)",
+        "0"
+      ],
+      "data_type": "object"
+    },
+    "D4N": {
+      "unique_count": 2,
+      "sample_values": [
+        "Condição de funcionamento da unidade de tratamento",
+        ""
+      ],
+      "data_type": "object"
+    }
+  },
+  "timestamp": "2025-08-01T14:52:11.437365"
+}

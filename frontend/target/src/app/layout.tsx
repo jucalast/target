@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
 import "./globals.css";
 import { Providers } from "../components/ui/providers";
 
 export const metadata: Metadata = {
-  title: "Análise de Sentimentos",
-  description: "Plataforma para análise de sentimentos de textos",
+  title: "Target Dashboard",
+  description: "Sistema inteligente de análise de dados com Dynamic Island",
 };
 
 export default function RootLayout({
@@ -15,8 +13,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body className="bg-background-dark text-text-primary">
+    <html lang="pt-br">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" 
+          rel="stylesheet" 
+        />
+      </head>
+      <body style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif" }}>
         <Providers>
           {children}
         </Providers>

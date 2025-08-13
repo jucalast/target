@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 # ==============================================================================
 # Schema Base
@@ -14,6 +15,9 @@ class UserBase(BaseModel):
     Isso evita a repetição de código (princípio DRY).
     """
     email: EmailStr  # Utiliza EmailStr para validação automática do formato do e-mail.
+    name: str
+    role: str = "user"
+    avatar: Optional[str] = None
 
 # ==============================================================================
 # Schema para Criação de Usuário
@@ -22,7 +26,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """
     Schema usado para criar um novo usuário.
-    Herda o campo 'email' de UserBase e adiciona o campo 'password'.
+    Herda os campos de UserBase e adiciona o campo 'password'.
     Este é o modelo de dados que a API esperará receber no corpo da requisição
     para o endpoint de criação de usuário.
     """
@@ -35,7 +39,7 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     """
     Schema usado para retornar os dados de um usuário pela API.
-    Herda o campo 'email' de UserBase e adiciona os campos que são seguros
+    Herda os campos de UserBase e adiciona os campos que são seguros
     para serem expostos ao cliente.
 
     Criticamente, este schema NÃO inclui o campo 'password', garantindo que

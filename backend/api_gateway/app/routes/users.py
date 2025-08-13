@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from shared.schemas import user as user_schema
 from api_gateway.app.services import user_service
 from shared.db.database import get_db
+from shared.utils.security import get_current_user_email
 
 # ==============================================================================
 # Roteador da API para Usuários
@@ -46,3 +47,30 @@ def create_user(
     # Se o e-mail for único, delega a criação do usuário para a camada de serviço.
     # A função de serviço lida com o hashing da senha e a interação com o banco.
     return user_service.create_user(db=db, user=user)
+
+
+@router.get(
+    "/me",
+    response_model=user_schema.UserRead
+)
+def get_current_user(
+    current_user_email: str = Depends(get_current_user_email),
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint para obter informações do usuário atualmente autenticado.
+
+    - **current_user_email**: Email do usuário extraído do token JWT.
+    - **db**: Sessão do banco de dados, injetada pela dependência `get_db`.
+    - **response_model**: Garante que a resposta seja formatada pelo schema `UserRead`.
+    """
+    # Busca o usuário pelo email extraído do token
+    db_user = user_service.get_user_by_email(db, email=current_user_email)
+    if not db_user:
+        # Se o usuário não for encontrado, levanta uma exceção HTTP.
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuário não encontrado."
+        )
+
+    return db_user

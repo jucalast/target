@@ -158,11 +158,18 @@ def extract_topics_lda(
         # Pega os índices das palavras mais importantes
         top_indices = topic.argsort()[:-n_top_words - 1:-1]
         
-        # Cria um dicionário para o tópico
+        # Cria um dicionário para o tópico no formato correto
+        keywords_with_scores = []
+        for i, idx in enumerate(top_indices):
+            keywords_with_scores.append({
+                'keyword': feature_names[idx],
+                'score': float(topic[idx])
+            })
+        
         topic_data = {
             'topic_id': topic_idx,
-            'keywords': [feature_names[i] for i in top_indices],
-            'scores': [float(topic[i]) for i in top_indices]
+            'keywords': keywords_with_scores,
+            'score': float(max(topic[i] for i in top_indices))  # Score do tópico é o maior score das keywords
         }
         topics.append(topic_data)
     
@@ -186,9 +193,15 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
     Returns:
         Dicionário com as características extraídas
     """
+    import time
+    start_time = time.time()
+    
     if not nlp:
         raise RuntimeError("Modelo spaCy 'pt_core_news_lg' não está disponível.")
 
+    # Texto original para preservar
+    original_text = f"{niche}. {description}"
+    
     # 1. Normalização
     normalized_niche = normalize_text(niche)
     normalized_description = normalize_text(description)
@@ -220,13 +233,21 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
     # Adiciona palavras-chave do nicho primeiro (com peso maior)
     for kw, score in zip(niche_keywords, niche_scores):
         if kw not in seen:
-            keywords.append({'keyword': kw, 'score': score * 1.5})  # Aumenta o peso do nicho
+            keywords.append({
+                'keyword': kw, 
+                'score': score * 1.5,  # Aumenta o peso do nicho
+                'method': 'tfidf_niche'
+            })
             seen.add(kw)
     
     # Adiciona palavras-chave da descrição
     for kw, score in zip(desc_keywords, desc_scores):
         if kw not in seen and len(keywords) < 20:  # Limita ao total de 20 palavras-chave
-            keywords.append({'keyword': kw, 'score': score})
+            keywords.append({
+                'keyword': kw, 
+                'score': score,
+                'method': 'tfidf_description'
+            })
             seen.add(kw)
     
     # Ordena as palavras-chave por score
@@ -246,7 +267,12 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
     
     # 5. Reconhecimento de Entidades Nomeadas (NER)
     entities = [
-        {'text': ent.text, 'label': ent.label_, 'start': ent.start_char, 'end': ent.end_char}
+        {
+            'text': ent.text, 
+            'label': ent.label_, 
+            'start_char': ent.start_char, 
+            'end_char': ent.end_char
+        }
         for ent in doc.ents
     ]
     
@@ -263,7 +289,9 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
         # Gera embeddings para cada tópico
         topic_embeddings = []
         for topic in topics:
-            topic_text = ' '.join(topic['keywords'])
+            # Extrai as palavras-chave do tópico (agora são objetos dict)
+            topic_keywords = [kw.get('keyword', str(kw)) if isinstance(kw, dict) else str(kw) for kw in topic.get('keywords', [])]
+            topic_text = ' '.join(topic_keywords)
             topic_embedding = BERT_MODEL.encode(
                 topic_text,
                 convert_to_tensor=False,
@@ -285,30 +313,29 @@ def extract_features(niche: str, description: str) -> Dict[str, Any]:
         # Fallback para embeddings do spaCy se BERT não estiver disponível
         bert_embedding = doc.vector.tolist()
     
-    # 7. Montagem do resultado
+    # 7. Montagem do resultado no formato correto para NLPFeatures
+    processing_time = time.time() - start_time
+    
     result = {
+        'original_text': original_text,
         'normalized_text': full_text,
-        'keywords': keywords,
+        'keywords': keywords,  # Já no formato correto com keyword, score, method
         'topics': topics,
-        'entities': entities,
+        'entities': entities,  # Já no formato correto com start_char, end_char
         'embeddings': {
-            'bert': bert_embedding if BERT_AVAILABLE else None,
-            'spacy': doc.vector.tolist(),
-            'dimension_bert': BERT_DIM if BERT_AVAILABLE else 0,
-            'dimension_spacy': len(doc.vector)
+            'bert': {
+                'model': 'sentence-transformers/all-MiniLM-L6-v2',
+                'vector': bert_embedding if BERT_AVAILABLE else [],
+                'dim': BERT_DIM if BERT_AVAILABLE else 0
+            },
+            'spacy': {
+                'model': 'pt_core_news_lg',
+                'vector': doc.vector.tolist(),
+                'dim': len(doc.vector)
+            }
         },
-        'metadata': {
-            'language': 'portuguese',
-            'model': 'pt_core_news_lg' + (' + all-MiniLM-L6-v2' if BERT_AVAILABLE else ''),
-            'processing_steps': [
-                'normalization', 
-                'tfidf', 
-                'lda', 
-                'ner', 
-                'spacy_embedding',
-                'bert_embedding' if BERT_AVAILABLE else 'bert_unavailable'
-            ]
-        }
+        'language': 'pt-BR',
+        'processing_time': processing_time
     }
     
     return result

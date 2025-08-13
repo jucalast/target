@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efeito de Decomposição de Texto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000000;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            display: none; /* Esconder o container original */
+        }
+
+        /* Centro de sucção */
+        .vortex-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.1) 70%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.6),
+                0 0 40px rgba(255, 255, 255, 0.4),
+                0 0 60px rgba(255, 255, 255, 0.2);
+            animation: vortexPulse 2s ease-in-out infinite alternate;
+            z-index: 1000;
+        }
+
+        @keyframes vortexPulse {
+            0% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.6;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        .text-element {
+            font-size: 6rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+            position: relative;
+            display: inline-block;
+            font-family: 'Arial Black', sans-serif;
+            filter: none;
+            transition: filter 0.1s ease;
+        }
+
+        .decomposing {
+            animation: textDecomposition 5s ease-out forwards;
+        }
+
+        @keyframes textDecomposition {
+            0% { 
+                filter: none;
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            }
+            10% { 
+                filter: contrast(0.95) brightness(0.98);
+                text-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
+            }
+            25% { 
+                filter: contrast(0.9) brightness(0.95) blur(0.2px);
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            }
+            40% { 
+                filter: contrast(0.8) brightness(0.9) blur(0.5px);
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            }
+            60% { 
+                filter: contrast(0.6) brightness(0.8) blur(1px);
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            }
+            80% { 
+                filter: contrast(0.3) brightness(0.6) blur(2px);
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            }
+            100% { 
+                filter: contrast(0) brightness(0.2) blur(3px);
+                text-shadow: none;
+                opacity: 0;
+            }
+        }
+
+        .char {
+            display: inline-block;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .char.decomposing {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .btn-decompose {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .btn-decompose:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(238, 90, 36, 0.4);
+        }
+
+        .btn-decompose:active {
+            transform: translateY(-1px);
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            color: #ffffff;
+            z-index: 500;
+            will-change: transform, opacity;
+            font-weight: bold;
+            width: 3px;
+            height: 3px;
+            background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 80%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 4px rgba(255, 255, 255, 0.8),
+                0 0 8px rgba(255, 255, 255, 0.5),
+                0 0 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .reset-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Efeito de vento sutil */
+        @keyframes windEffect {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(2px); }
+        }
+
+        .wind-effect {
+            animation: windEffect 3s ease-in-out infinite;
+        }
+
+        /* Efeito de brilho no fundo */
+        .background-stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-stars"></div>
+    
+    <!-- Centro de sucção -->
+    <div class="vortex-center"></div>
+    
+    <!-- Controles opcionais (invisíveis por padrão) -->
+    <div style="position: absolute; top: 20px; left: 20px; opacity: 0.3; z-index: 2000;">
+        <button onclick="startInfiniteParticles()" style="margin: 5px; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer;">Iniciar</button>
+        <button onclick="stopInfiniteParticles()" style="margin: 5px; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer;">Parar</button>
+    </div>
+
+    <script>
+        let isAnimating = false;
+
+        // Criar estrelas no fundo
+        function createStars() {
+            const starsContainer = document.querySelector('.background-stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Classe para gerenciar partículas sugadas para o centro
+        class Particle {
+            constructor() {
+                this.element = document.createElement('div');
+                this.element.className = 'particle';
+                
+                // Posição inicial: área mais larga no topo (efeito funil)
+                const funnelWidth = 200; // Largura do funil no topo
+                this.x = (window.innerWidth / 2) + (Math.random() - 0.5) * funnelWidth;
+                this.y = -20; // Começar acima da tela
+                
+                // Centro da tela (ponto de sucção)
+                this.centerX = window.innerWidth / 2;
+                this.centerY = window.innerHeight / 2;
+                
+                // Velocidade inicial (descendo lentamente com leve direcionamento ao centro)
+                const initialDirectionToCenterX = (this.centerX - this.x) * 0.002; // Força inicial suave para o centro
+                this.vx = initialDirectionToCenterX;
+                this.vy = Math.random() * 1 + 0.5; // Velocidade vertical inicial lenta
+                
+                // Propriedades do efeito de sucção
+                this.suctionForce = 0.02; // Força inicial de sucção
+                this.suctionRange = 300; // Distância para começar a sucção intensa
+                this.funnelRange = 500; // Distância para efeito de funil suave
+                this.maxSpeed = 8; // Velocidade máxima
+                
+                // Propriedades visuais
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.scale = Math.random() * 0.8 + 0.4;
+                this.life = 1.0;
+                
+                // Tamanho variado
+                const size = Math.random() * 4 + 1;
+                this.element.style.width = size + 'px';
+                this.element.style.height = size + 'px';
+                
+                // Posicionar elemento
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                this.element.style.opacity = this.opacity;
+                this.element.style.transform = `scale(${this.scale})`;
+                
+                document.body.appendChild(this.element);
+                this.animate();
+            }
+
+            animate() {
+                const updateParticle = () => {
+                    // Calcular distância do centro
+                    const dx = this.centerX - this.x;
+                    const dy = this.centerY - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Efeito de funil suave (mesmo antes da sucção intensa)
+                    if (distance > this.suctionRange && distance < this.funnelRange) {
+                        const funnelStrength = (this.funnelRange - distance) / this.funnelRange;
+                        const funnelForce = 0.008 * funnelStrength; // Força suave de direcionamento
+                        
+                        const funnelForceX = (dx / distance) * funnelForce;
+                        const funnelForceY = (dy / distance) * funnelForce * 0.3; // Menos força vertical no funil
+                        
+                        this.vx += funnelForceX;
+                        this.vy += funnelForceY;
+                        
+                        // Adicionar gravidade normal
+                        this.vy += 0.01;
+                    }
+                    // Se está longe do centro e do funil, desce normalmente
+                    else if (distance > this.funnelRange) {
+                        this.vy += 0.01; // Gravidade leve
+                    }
+                    // Dentro do range de sucção intensa
+                    else {
+                        const suctionStrength = (this.suctionRange - distance) / this.suctionRange;
+                        const forceMultiplier = this.suctionForce * (1 + suctionStrength * 3);
+                        
+                        // Força direcionada ao centro
+                        const forceX = (dx / distance) * forceMultiplier;
+                        const forceY = (dy / distance) * forceMultiplier;
+                        
+                        this.vx += forceX;
+                        this.vy += forceY;
+                        
+                        // Acelerar conforme se aproxima do centro
+                        this.suctionForce += 0.001;
+                    }
+                    
+                    // Limitar velocidade máxima
+                    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                    if (speed > this.maxSpeed) {
+                        this.vx = (this.vx / speed) * this.maxSpeed;
+                        this.vy = (this.vy / speed) * this.maxSpeed;
+                    }
+                    
+                    // Atualizar posição
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    // Efeito visual conforme se aproxima do centro
+                    if (distance < 100) {
+                        this.scale *= 0.99; // Diminuir conforme se aproxima
+                        this.opacity *= 0.98; // Desvanecer conforme se aproxima
+                    }
+                    
+                    // Aplicar transformações
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                    this.element.style.opacity = this.opacity;
+                    this.element.style.transform = `scale(${this.scale})`;
+                    
+                    // Continuar animação ou remover se chegou muito perto do centro
+                    if (distance > 5 && this.opacity > 0.01 && this.y < window.innerHeight + 100) {
+                        requestAnimationFrame(updateParticle);
+                    } else {
+                        this.element.remove();
+                    }
+                };
+                
+                requestAnimationFrame(updateParticle);
+            }
+        }
+
+        let animationRunning = false;
+
+        // Sistema de geração infinita de partículas
+        function startInfiniteParticles() {
+            if (animationRunning) return;
+            animationRunning = true;
+            
+            const generateParticle = () => {
+                if (animationRunning) {
+                    // Gerar 8-15 partículas por frame para densidade muito alta
+                    const particleCount = Math.floor(Math.random() * 8) + 8;
+                    for (let i = 0; i < particleCount; i++) {
+                        new Particle();
+                    }
+                    
+                    // Próxima geração em 50-150ms para fluxo mais constante
+                    const nextDelay = Math.random() * 100 + 50;
+                    setTimeout(generateParticle, nextDelay);
+                }
+            };
+            
+            generateParticle();
+        }
+
+        function stopInfiniteParticles() {
+            animationRunning = false;
+            
+            // Remover todas as partículas existentes
+            document.querySelectorAll('.particle').forEach(particle => {
+                particle.remove();
+            });
+        }
+
+        // Inicialização
+        window.addEventListener('load', () => {
+            createStars();
+            // Iniciar automaticamente após 1 segundo
+            setTimeout(() => {
+                startInfiniteParticles();
+            }, 1000);
+        });
+
+        // Atalho de teclado para controlar o efeito
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (animationRunning) {
+                    stopInfiniteParticles();
+                } else {
+                    startInfiniteParticles();
+                }
+            }
+        });
+
+        // Redimensionar centro quando a janela muda de tamanho
+        window.addEventListener('resize', () => {
+            // Atualizar posição do centro para todas as partículas existentes
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // As partículas já existentes vão automaticamente se ajustar
+            // pois usam window.innerWidth/Height em tempo real
+        });
+    </script>
+</body>
+</html>

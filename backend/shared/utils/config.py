@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./test.db"
     POSTGRESQL_URL: str = "postgresql://postgres:postgres@localhost:5432/target_db"
     
+    # Configurações específicas do PostgreSQL
+    POSTGRES_DB: str = "market_analysis"
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    
     # Configurações do pool de conexão do PostgreSQL
     POSTGRESQL_POOL_SIZE: int = 5
     POSTGRESQL_MAX_OVERFLOW: int = 10

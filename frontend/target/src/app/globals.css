@@ -1,29 +1,55 @@
 @import "tailwindcss";
 
+
+/* Fallback para fontes Apple que podem estar instaladas localmente */
+@font-face {
+  font-family: 'SF Pro Text';
+  src: local('SF Pro Text'), local('SFProText-Regular');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('SF Pro Display'), local('SFProDisplay-Regular');
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   /* === CORES PRINCIPAIS === */
-  --bg-primary: #0a0a0a;           /* Preto profundo para fundo principal */
-  --bg-secondary: #1a1a1a;         /* Grafite escuro para cards/seções */
-  --bg-tertiary: #2a2a2a;          /* Cinza escuro para inputs/elementos */
+  --bg-primary: #e6e6e6;           /* Cinza claro para fundo principal */
+  --bg-secondary: #efefef;         /* Branco para cards/seções */
+  --bg-tertiary: #dfdfdf;          /* Branco para inputs/elementos */
+  --bg-quaternary: #c0c0c0;        /* Cinza para divisores */
   
-  --text-primary: #ffffff;          /* Branco para títulos e texto principal */
-  --text-secondary: #b8b8b8;       /* Cinza claro para texto secundário */
-  --text-muted: #888888;           /* Cinza médio para placeholders */
+  --text-primary: #000000;          /* Preto para títulos e texto principal */
+  --text-secondary: #666666;       /* Cinza escuro para texto secundário */
+  --text-muted: #999999;           /* Cinza médio para placeholders */
   
-  --accent-primary: #4a90e2;       /* Azul frio para destaques principais */
-  --accent-secondary: #6ba3f0;     /* Azul mais claro para hover */
-  --accent-muted: #2d5aa0;         /* Azul escuro para bordas/sutis */
+  --accent-primary: #6366f1;       /* Roxo/azul para destaques principais */
+  --accent-secondary: #8b5cf6;     /* Roxo para hover */
+  --accent-muted: #a5b4fc;         /* Roxo claro para bordas/sutis */
   
-  --border-primary: #333333;       /* Bordas principais */
-  --border-secondary: #444444;     /* Bordas de hover */
-  --border-muted: #222222;         /* Bordas sutis */
+  --border-primary: #d1d5db;       /* Bordas principais */
+  --border-secondary: #9ca3af;     /* Bordas de hover */
+  --border-muted: #e5e7eb;         /* Bordas sutis */
   
-  --success: #4ade80;              /* Verde para sucesso */
-  --warning: #fbbf24;              /* Amarelo para avisos */
+  --success: #10b981;              /* Verde para sucesso */
+  --warning: #f59e0b;              /* Amarelo para avisos */
   --error: #ef4444;                /* Vermelho para erros */
   
+  /* === DYNAMIC ISLAND & SCROLLBAR === */
+  --dynamic-island-bg: #000000;    /* Preto para Dynamic Island */
+  --scrollbar-bg: #000000;         /* Preto para scrollbar */
+  --scrollbar-thumb: #333333;      /* Cinza escuro para thumb do scrollbar */
+  --scrollbar-thumb-color: #000000;    /* Cor do polegar da scrollbar customizada */
+  --scrollbar-thumb-hover-color: #333333;  /* Cor do polegar no hover */
+  --scrollbar-track-color: transparent;    /* Cor da trilha da scrollbar */
+  --scrollbar-width: 12px;             /* Largura da scrollbar customizada */
+  
   /* === TIPOGRAFIA === */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
   --font-size-xs: 0.75rem;         /* 12px */
   --font-size-sm: 0.875rem;        /* 14px */
   --font-size-base: 1rem;          /* 16px */
@@ -57,9 +83,9 @@
   --border-radius-lg: 0.75rem;      /* 12px */
   --border-radius-xl: 1rem;         /* 16px */
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
   
   /* === TRANSIÇÕES === */
   --transition-fast: 150ms ease-in-out;
@@ -68,14 +94,85 @@
 }
 
 /* === ESTILOS BASE === */
+html {
+  font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-family);
+  font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+}
+
+/* === APLICAÇÃO DA FONTE SISTEMA APPLE === */
+* {
+  font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fontes específicas para diferentes elementos */
+body, p, span, div, input, textarea, select, button, label, a {
+  font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+  font-weight: 600;
+}
+
+/* Aplicação específica para componentes React */
+.apple-font {
+  font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+}
+
+.apple-font-display {
+  font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+  font-weight: 600;
+}
+
+/* === SCROLLBAR CUSTOMIZADA === */
+/* Webkit Scrollbar (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-bg);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Remove as setas da barra de rolagem */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-bg) transparent;
 }
 
 /* === TIPOGRAFIA === */
@@ -124,8 +221,6 @@ p {
   color: var(--bg-primary);
   border-color: var(--text-primary);
   text-decoration: none;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
@@ -153,7 +248,6 @@ p {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* === INPUTS === */
@@ -172,7 +266,6 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
 input::placeholder, textarea::placeholder {
@@ -192,54 +285,7 @@ a:hover {
 
 /* === COMPONENTES ESPECÍFICOS === */
 .home-background {
-  background-image: url('/Poppins (2).png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-/* Sidebar */
-.sidebar-minimal {
-  width: 16rem; /* 256px */
-  transition: width var(--transition-normal);
-  background-color: var(--bg-secondary);
-  border-top-right-radius: var(--border-radius-lg);
-}
-
-.sidebar-icon {
-  color: var(--text-secondary);
-  font-size: var(--font-size-xl);
-  transition: color var(--transition-fast);
-}
-
-.sidebar-label {
-  opacity: 1; /* Sempre visível */
-  transition: opacity 0.2s ease-in-out;
-  white-space: nowrap;
-  margin-left: var(--spacing-sm);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Header */
-.header-nav-link {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.header-nav-link:hover {
-  color: var(--text-primary);
-  background-color: var(--bg-tertiary);
-}
-
-.header-nav-link.active {
-  color: var(--text-primary);
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-primary);
 }
 
 /* Cards e Seções */
@@ -254,8 +300,44 @@ a:hover {
 
 .card:hover {
   border-color: var(--border-secondary);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+}
+
+/* Dashboard específico */
+.dashboard-container {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.dashboard-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-muted);
+  transition: all var(--transition-normal);
+}
+
+.dashboard-card:hover {
+  border-color: var(--border-secondary);
+}
+
+/* Título principal do dashboard */
+.dashboard-title {
+  font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+  font-size: 5rem; /* Diminuindo um pouco */
+  font-weight: 100; /* Bem fino */
+  line-height: 1.1;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-title {
+    font-size: 3.5rem;
+  }
 }
 
 /* Estados de Feedback */
@@ -320,6 +402,34 @@ a:hover {
   border-radius: var(--border-radius);
   border: 1px solid var(--border-primary);
   overflow: hidden; /* Para manter os cantos arredondados */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.table-cell {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-muted);
+  color: var(--text-secondary);
+}
+
+.table tbody tr:last-child .table-cell {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bg-tertiary);
 }
 
 /* Badges de Status */
@@ -394,7 +504,6 @@ a:hover {
 .form-input:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
 .form-input::placeholder {
@@ -447,7 +556,6 @@ a:hover {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 .icon-btn {
@@ -486,51 +594,170 @@ button:disabled {
   border-color: var(--error);
 }
 
-/* === Sidebar Styles === */
-.sidebar-minimal {
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 80px;
+/* === CLASSES UTILITÁRIAS PARA USAR COM TAILWIND === */
+.bg-primary {
+  background-color: var(--bg-primary) !important;
 }
 
-.sidebar-minimal:hover {
-  width: 256px;
+.bg-secondary {
+  background-color: var(--bg-secondary) !important;
 }
 
-.sidebar-item {
-  display: flex;
+.bg-tertiary {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.border-primary {
+  border-color: var(--border-primary) !important;
+}
+
+.border-muted {
+  border-color: var(--border-muted) !important;
+}
+
+/* Success/Warning/Error Background Classes */
+.bg-success {
+  background-color: var(--success) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning) !important;
+}
+
+.bg-error {
+  background-color: var(--error) !important;
+}
+
+.bg-accent-primary {
+  background-color: var(--accent-primary) !important;
+}
+
+/* === CURSOR PERSONALIZADO === */
+@keyframes cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+.cursor-pulse {
+  animation: cursor-blink 1s infinite;
+  color: #9333ea; /* roxo */
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1.1em;
+  
+  /* Brilho aplicado diretamente no traço | */
+  text-shadow:
+    0 0 8px #b768ff,
+    0 0 16px #b768ff,
+    0 0 20px #b768ff;
+}
+
+/* Custom textarea para remover cursor padrão */
+.custom-cursor {
+  caret-color: transparent;
+}
+
+.custom-cursor:focus {
+  outline: none;
+  border: none;
+}
+
+/* Força fonte monoespaçada para chat */
+.chat-monospace,
+.chat-monospace *,
+.chat-monospace p,
+.chat-monospace span,
+.chat-monospace div {
+  font-family: "Consolas", "Courier New", "Monaco", monospace !important;
+  font-weight: 400 !important;
+}
+
+/* Remove todas as bordas e outlines de inputs no chat */
+.chat-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  resize: none !important;
+}
+
+.chat-input:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove scrollbar do textarea do chat */
+.chat-input::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Remove botões de scroll (setinhas) do textarea */
+.chat-input::-webkit-scrollbar-button {
+  display: none;
+}
+
+.chat-input::-webkit-scrollbar-thumb,
+.chat-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Firefox - remove scrollbar completamente */
+.chat-input {
+  scrollbar-width: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Remove scrollbar de todos os textareas */
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
+textarea::-webkit-scrollbar-button {
+  display: none;
+}
+
+textarea {
+  scrollbar-width: none;
+}
+
+/* Remove apenas spinners de inputs numéricos (caso necessário) */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* === Button Styles === */
+.btn {
+  display: inline-flex;
   align-items: center;
-  text-decoration: none;
-  color: var(--text-secondary);
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md);
-  transition: background-color 0.2s ease, color 0.2s ease;
-  white-space: nowrap; /* Impede que o texto quebre linha */
-  overflow: hidden; /* Garante que o conteúdo não transborde */
-}
-
-.sidebar-item:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-}
-
-.sidebar-icon {
-  flex-shrink: 0; /* Impede que o ícone encolha */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-}
-
-.sidebar-label {
-  margin-left: 1rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-}
-
-.sidebar-minimal:hover .sidebar-label {
-  opacity: 1;
-  transition-delay: 0.1s; /* Pequeno atraso para a aparição do texto */
+  text-decoration: none;
+  transition: all var(--transition-normal);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
 }
 

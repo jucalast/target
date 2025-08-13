@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import withAuth from "@/components/auth/withAuth";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from 'next/navigation';
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 interface Analysis {
   id: number;
@@ -41,54 +42,58 @@ function AnalysisListPage() {
   }, [token]);
 
   return (
-    <main className="p-8" style={{ color: 'var(--text-primary)'}}>
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Análises Realizadas</h1>
-        <button 
-          onClick={() => router.push('/dashboard/analysis/create')}
-          className="btn btn-primary"
-        >
-          + Iniciar Nova Análise
-        </button>
-      </header>
+    <DashboardLayout>
+      <div className="dashboard-container">
+        <div className="p-8">
+          <header className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-bold text-primary">Análises Realizadas</h1>
+            <button 
+              onClick={() => router.push('/dashboard/analysis/create')}
+              className="btn btn-primary"
+            >
+              + Iniciar Nova Análise
+            </button>
+          </header>
 
-      {error && <p className="error-message text-center mb-4">Erro: {error}</p>}
+          {error && <p className="error-message text-center mb-4">Erro: {error}</p>}
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th className="table-header">ID</th>
-              <th className="table-header">Descrição</th>
-              <th className="table-header">Status</th>
-              <th className="table-header">Data de Criação</th>
-            </tr>
-          </thead>
-          <tbody>
-            {analyses.length > 0 ? (
-              analyses.map((analysis) => (
-                <tr key={analysis.id}>
-                  <td className="table-cell font-medium">{analysis.id}</td>
-                  <td className="table-cell">{analysis.description}</td>
-                  <td className="table-cell">
-                    <span className={`status-badge status-${analysis.status?.toLowerCase() || 'default'}`}>
-                      {analysis.status}
-                    </span>
-                  </td>
-                  <td className="table-cell">{new Date(analysis.created_at).toLocaleString()}</td>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th className="table-header">ID</th>
+                  <th className="table-header">Descrição</th>
+                  <th className="table-header">Status</th>
+                  <th className="table-header">Data de Criação</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="table-cell text-center" style={{ color: 'var(--text-muted)'}}>
-                  Nenhuma análise encontrada.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {analyses.length > 0 ? (
+                  analyses.map((analysis) => (
+                    <tr key={analysis.id}>
+                      <td className="table-cell font-medium">{analysis.id}</td>
+                      <td className="table-cell">{analysis.description}</td>
+                      <td className="table-cell">
+                        <span className={`status-badge status-${analysis.status?.toLowerCase() || 'default'}`}>
+                          {analysis.status}
+                        </span>
+                      </td>
+                      <td className="table-cell">{new Date(analysis.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="table-cell text-center text-secondary">
+                      Nenhuma análise encontrada.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </main>
+    </DashboardLayout>
   );
 }
 

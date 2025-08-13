@@ -1,0 +1,471 @@
+{
+  "system_flow_complete_data": {
+    "analysis_metadata": {
+      "analysis_id": 37,
+      "status": "completed",
+      "timestamp": "2025-08-01T18:59:55.671886",
+      "processing_duration": "~45 seconds",
+      "pipeline_version": "v2.0_real_data_integration"
+    },
+    "user_input": {
+      "niche": "Tecnologia",
+      "description": "Análise abrangente do mercado de tecnologia no Brasil, incluindo tendências atuais, \n    crescimento do setor, principais players e oportunidades de investimento. Esta análise cobre \n    desde startups inovadoras até grandes empresas de tecnologia estabelecidas no mercado brasileiro.",
+      "input_length": 284,
+      "processing_stage": "1_user_input"
+    },
+    "nlp_processing": {
+      "processing_stage": "2_nlp_extraction",
+      "original_text": "Tecnologia. Análise abrangente do mercado de tecnologia no Brasil, incluindo tendências atuais, \n    crescimento do setor, principais players e oportunidades de investimento. Esta análise cobre \n    desde startups inovadoras até grandes empresas de tecnologia estabelecidas no mercado brasileiro.",
+      "normalized_text": "tecnologia. analise abrangente do mercado de tecnologia no brasil incluindo tendencias atuais crescimento do setor principais players e oportunidades de investimento esta analise cobre desde startups inovadoras ate grandes empresas de tecnologia estabelecidas no mercado brasileiro",
+      "keywords_extracted": [
+        {
+          "keyword": "tecnologia",
+          "score": 1.5,
+          "method": "tfidf",
+          "rank": 1
+        },
+        {
+          "keyword": "mercado",
+          "score": 0.32025630761017426,
+          "method": "tfidf",
+          "rank": 2
+        },
+        {
+          "keyword": "analise",
+          "score": 0.32025630761017426,
+          "method": "tfidf",
+          "rank": 3
+        },
+        {
+          "keyword": "investimento analise",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 4
+        },
+        {
+          "keyword": "abrangente mercado",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 5
+        },
+        {
+          "keyword": "analise abrangente",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 6
+        },
+        {
+          "keyword": "analise cobre",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 7
+        },
+        {
+          "keyword": "ate",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 8
+        },
+        {
+          "keyword": "grandes",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 9
+        },
+        {
+          "keyword": "grandes empresas",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 10
+        },
+        {
+          "keyword": "incluindo",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 11
+        },
+        {
+          "keyword": "incluindo tendencias",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 12
+        },
+        {
+          "keyword": "inovadoras",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 13
+        },
+        {
+          "keyword": "inovadoras ate",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 14
+        },
+        {
+          "keyword": "investimento",
+          "score": 0.16012815380508713,
+          "method": "tfidf",
+          "rank": 15
+        }
+      ],
+      "entities_extracted": [
+        {
+          "text": "analise",
+          "label": "LOC",
+          "start_char": 12,
+          "end_char": 19,
+          "confidence": 0.8
+        },
+        {
+          "text": "brasil",
+          "label": "LOC",
+          "start_char": 59,
+          "end_char": 65,
+          "confidence": 0.8
+        }
+      ],
+      "topics_identified": [
+        {
+          "topic_id": 0,
+          "keywords": [
+            {
+              "word": "analise cobre",
+              "score": 0.5
+            },
+            {
+              "word": "tecnologia estabelecidas",
+              "score": 0.5
+            },
+            {
+              "word": "cobre",
+              "score": 0.5
+            },
+            {
+              "word": "mercado",
+              "score": 0.5
+            },
+            {
+              "word": "startups",
+              "score": 0.5
+            }
+          ],
+          "score": 0.0,
+          "relevance": "medium"
+        }
+      ],
+      "processing_metrics": {
+        "total_keywords": 15,
+        "total_entities": 2,
+        "total_topics": 1,
+        "processing_time_seconds": 1.0
+      }
+    },
+    "etl_processing": {
+      "processing_stage": "3_etl_data_extraction",
+      "market_analysis": {
+        "market_size": 7112733.0,
+        "growth_rate": 0.15,
+        "market_confidence": "high",
+        "calculation_method": "IBGE_Real_Data_Analysis"
+      },
+      "data_sources_used": {
+        "ibge_sidra": {
+          "status": "success",
+          "tables_queried": [
+            "6407",
+            "6401"
+          ],
+          "data_quality": "official_government_data"
+        },
+        "google_trends": {
+          "status": "success",
+          "keywords_analyzed": [
+            "tecnologia",
+            "mercado",
+            "analise"
+          ],
+          "timeframe": "12_months",
+          "geographic_scope": "Brazil"
+        },
+        "news_scraping": {
+          "status": "success",
+          "sources": [
+            "g1.globo.com",
+            "agenciabrasil.ebc.com.br",
+            "valor.globo.com"
+          ],
+          "articles_found": 6,
+          "quality": "official_news_sources"
+        }
+      },
+      "apis_integration": {
+        "real_apis_used": true,
+        "sources_list": [
+          "NLP",
+          "IBGE_SIDRA",
+          "PNAD",
+          "Censo_2022"
+        ],
+        "integration_success": true
+      },
+      "nlp_features_utilized": {
+        "keywords": [
+          "tecnologia",
+          "mercado",
+          "analise",
+          "investimento analise",
+          "abrangente mercado",
+          "analise abrangente",
+          "analise cobre",
+          "ate",
+          "grandes",
+          "grandes empresas"
+        ],
+        "entities": [
+          "analise",
+          "brasil"
+        ],
+        "topics_count": 1
+      }
+    },
+    "psychographic_analysis": {
+      "processing_stage": "4_psychographic_profiling",
+      "integration_status": true,
+      "profile_data": {
+        "segment_name": "Segmento_tecnologia_mercado",
+        "archetype": "Experiencialista",
+        "sentiment_index": 0.925,
+        "dominant_emotions": [
+          "otimismo",
+          "entusiasmo",
+          "confiança",
+          "aventura",
+          "curiosidade"
+        ],
+        "behavioral_trends": [
+          "digitalização_avançada",
+          "economia_experiência",
+          "consumo_experiencial",
+          "inovação_precoce"
+        ],
+        "spending_pattern": {
+          "total": 4205.8,
+          "categories": {
+            "114023": 33.893670645299345,
+            "114024": 25.804840933948352,
+            "114031": 21.194540872128965,
+            "114025": 6.74782443292596,
+            "114030": 4.189452660611536,
+            "114027": 3.200342384326406,
+            "114032": 2.8365590375196157,
+            "114029": 2.1327690332398115
+          },
+          "behavior_indicators": {
+            "materialistic": true,
+            "health_conscious": false,
+            "family_oriented": true,
+            "experience_seeking": true,
+            "security_focused": false
+          },
+          "dominant_category": "114023"
+        },
+        "lifestyle_indicators": {
+          "tech_adoption": 1.0,
+          "comfort_level": 0.6666666666666666,
+          "basic_coverage": 1.0,
+          "total_goods": 9,
+          "mobility": true
+        },
+        "data_source": "POF-IBGE-2017-2018-REAL",
+        "confidence_score": 0.95,
+        "generated_at": "2025-08-01T15:59:55.573227"
+      },
+      "marketing_insights": {
+        "archetype": "Experiencialista",
+        "top_emotions": [
+          "otimismo",
+          "entusiasmo",
+          "confiança"
+        ],
+        "behavioral_trends": [
+          "digitalização_avançada",
+          "economia_experiência",
+          "consumo_experiencial"
+        ],
+        "sentiment_level": "positive",
+        "data_confidence": 0.95
+      },
+      "data_sources": [
+        "IBGE_POF_REAL",
+        "SIDRA_API",
+        "NLP_Features"
+      ],
+      "methodology": "TCC_Psychographic_Analysis_v2",
+      "processing_time": 2.5,
+      "pof_data_quality": "dados_reais"
+    },
+    "insights_generation": {
+      "processing_stage": "5_insights_synthesis",
+      "market_opportunities": [
+        {
+          "segment": "Mercado amplo",
+          "potential": 0.9,
+          "reasoning": "Mercado amplo com 7,112,733 potenciais usuários",
+          "data_source": "ETL Analysis",
+          "confidence": 0.85
+        },
+        {
+          "segment": "Segmento Experiencialista",
+          "potential": 0.6,
+          "reasoning": "Perfil psicográfico 'Experiencialista' identificado com características específicas",
+          "data_source": "Psychographic Analysis",
+          "confidence": 0.8,
+          "archetype_insights": []
+        },
+        {
+          "segment": "Segmento em crescimento",
+          "potential": 0.9,
+          "reasoning": "Taxa de crescimento de 15.0% indica mercado em expansão",
+          "data_source": "Market Trends",
+          "confidence": 0.75
+        },
+        {
+          "segment": "Nicho - tecnologia",
+          "potential": 0.7,
+          "reasoning": "Termo 'tecnologia' identificado como relevante pela análise",
+          "data_source": "NLP Analysis",
+          "confidence": 0.6
+        },
+        {
+          "segment": "Nicho - mercado",
+          "potential": 0.7,
+          "reasoning": "Termo 'mercado' identificado como relevante pela análise",
+          "data_source": "NLP Analysis",
+          "confidence": 0.6
+        }
+      ],
+      "strategic_recommendations": [
+        {
+          "category": "marketing",
+          "action": "Focar em estratégias relacionadas a 'tecnologia'",
+          "priority": "high",
+          "reasoning": "Keyword 'tecnologia' identificada como relevante pela análise NLP",
+          "expected_impact": "Aumento de visibilidade no nicho"
+        },
+        {
+          "category": "marketing",
+          "action": "Focar em estratégias relacionadas a 'mercado'",
+          "priority": "high",
+          "reasoning": "Keyword 'mercado' identificada como relevante pela análise NLP",
+          "expected_impact": "Aumento de visibilidade no nicho"
+        },
+        {
+          "category": "marketing",
+          "action": "Focar em estratégias relacionadas a 'analise'",
+          "priority": "medium",
+          "reasoning": "Keyword 'analise' identificada como relevante pela análise NLP",
+          "expected_impact": "Aumento de visibilidade no nicho"
+        },
+        {
+          "category": "strategy",
+          "action": "Desenvolver estratégia de escala",
+          "priority": "high",
+          "reasoning": "Market size de 7,112,733 permite estratégias de grande escala",
+          "expected_impact": "Maximização do potencial de mercado"
+        },
+        {
+          "category": "communication",
+          "action": "Usar tom otimista e aspiracional na comunicação",
+          "priority": "medium",
+          "reasoning": "Índice de sentimento alto (0.93) indica otimismo do segmento",
+          "expected_impact": "Melhor ressonância da mensagem"
+        }
+      ],
+      "identified_risks": [
+        {
+          "factor": "Concorrência intensa",
+          "level": "medium",
+          "probability": 0.7,
+          "mitigation": "Diferenciação através de inovação",
+          "reasoning": "Alto crescimento (15.0%) pode atrair concorrentes"
+        }
+      ],
+      "insights_metadata": {
+        "generated_from": {
+          "market_size": 7112733.0,
+          "growth_rate": 0.15,
+          "main_keywords": [
+            "tecnologia",
+            "mercado",
+            "analise",
+            "investimento analise",
+            "abrangente mercado"
+          ],
+          "sentiment_score": 0.925,
+          "geographic_entities": [
+            "analise",
+            "brasil"
+          ],
+          "psychographic_archetype": "Experiencialista",
+          "psychographic_integration": true
+        },
+        "generated_at": "2025-08-01T18:59:55.574305",
+        "confidence_level": "high",
+        "psychographic_integration": true,
+        "data_sources": [
+          "NLP",
+          "ETL",
+          "Market Analysis",
+          "Psychographic Analysis"
+        ]
+      },
+      "confidence_level": "high",
+      "data_integration_sources": [
+        "NLP",
+        "ETL",
+        "Market Analysis",
+        "Psychographic Analysis"
+      ]
+    },
+    "data_persistence": {
+      "processing_stage": "6_data_storage",
+      "mongodb_storage": {
+        "status": "success",
+        "document_id": "688d0eabbc6692739f9fcc0e",
+        "collections_used": [
+          "analyses"
+        ],
+        "data_completeness": "full"
+      },
+      "postgresql_storage": {
+        "status": "success",
+        "analysis_record_id": 37,
+        "status_updated": "completed"
+      },
+      "data_validation": {
+        "nlp_etl_consistency": true,
+        "etl_insights_consistency": true,
+        "data_chain_integrity": true
+      }
+    },
+    "system_metrics": {
+      "pipeline_stages_completed": 6,
+      "total_apis_called": 3,
+      "data_sources_integrated": 4,
+      "real_data_percentage": 100.0,
+      "processing_success_rate": 1.0,
+      "system_reliability": "high"
+    },
+    "executive_summary": {
+      "market_size_result": "7,112,733 potential users",
+      "growth_rate_result": "15.0% annual growth",
+      "psychographic_profile": "Experiencialista",
+      "sentiment_index": 0.925,
+      "top_opportunities": 5,
+      "strategic_recommendations": 5,
+      "data_reliability": "100% real data sources",
+      "analysis_confidence": "High"
+    }
+  }
+}

@@ -34,7 +34,29 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      login(data.access_token);
+      
+      // Buscar dados do usuário após login bem-sucedido
+      try {
+        const userRes = await fetch('http://localhost:8000/api/v1/users/me', {
+          headers: {
+            'Authorization': `Bearer ${data.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          login(data.access_token, userData);
+        } else {
+          // Login com token apenas se não conseguir buscar dados do usuário
+          login(data.access_token);
+        }
+      } catch (userError) {
+        console.error('Erro ao buscar dados do usuário:', userError);
+        // Login com token apenas se houver erro
+        login(data.access_token);
+      }
+      
       router.push('/dashboard');
     } catch (err) {
       setError('Credenciais inválidas. Por favor, tente novamente.');

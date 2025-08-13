@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Island (Curva Para Fora - Método Radial-Gradient)</title>
+    
+    <style>
+        :root {
+            /* Variáveis para fácil customização */
+            --corner-radius: 22px; /* O raio das curvas para fora */
+            --island-height: 70px;
+            --default-width: 250px;
+            --expanded-width: 400px;
+            --transition-speed: 0.5s;
+            --spring-transition: var(--transition-speed) cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            --page-bg: #E0E0E0;
+            --island-bg: #000;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            padding-top: 40px; 
+        }
+
+        .dynamic-island {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: var(--default-width);
+            height: var(--island-height);
+            background-color: var(--island-bg);
+            color: #fff;
+            padding: 0 20px;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: width var(--spring-transition);
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+        }
+        
+        /* NOVA ABORDAGEM COM RADIAL-GRADIENT */
+        .dynamic-island::before,
+        .dynamic-island::after {
+            content: '';
+            position: absolute;
+            top: 0; /* Alinha com o topo da ilha */
+            width: var(--corner-radius);
+            height: var(--corner-radius);
+            /* O fundo agora é o nosso gradiente que desenha a curva */
+        }
+
+        /* CURVA DO LADO ESQUERDO (invertida verticalmente) */
+        .dynamic-island::before {
+            right: 100%; /* Posiciona ao lado esquerdo da ilha */
+            /* Desenha um círculo no canto inferior esquerdo do pseudo-elemento.
+               O círculo tem a cor da ilha até o raio e depois fica transparente.
+               Isso cria um quarto de círculo preto que forma a curva invertida verticalmente. */
+            background: radial-gradient(circle at 0% 100%, 
+                transparent var(--corner-radius), 
+                var(--island-bg) calc(var(--corner-radius) + 0.5px)
+            );
+        }
+
+        /* CURVA DO LADO DIREITO (invertida verticalmente) */
+        .dynamic-island::after {
+            left: 100%; /* Posiciona ao lado direito da ilha */
+            /* O mesmo princípio, mas o círculo é desenhado no canto inferior direito. */
+            background: radial-gradient(circle at 100% 100%, 
+                transparent var(--corner-radius), 
+                var(--island-bg) calc(var(--corner-radius) + 0.5px)
+            );
+        }
+
+        /* --- Estilos de conteúdo e animação (sem alterações) --- */
+        .dynamic-island.expanded {
+            width: var(--expanded-width);
+        }
+        .status-indicator {
+            width: 40px;
+            height: 40px;
+            background-color: #6A6AFF;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all var(--transition-speed) ease;
+        }
+        .dynamic-island.expanded .status-indicator { width: 0; opacity: 0; }
+        .island-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            opacity: 0;
+            max-width: 0;
+            transition: max-width var(--spring-transition), opacity var(--transition-speed) ease-in-out;
+        }
+        .dynamic-island.expanded .island-content { opacity: 1; max-width: 300px; }
+        .icon-container { flex-shrink: 0; }
+        .text-content { white-space: nowrap; overflow: hidden; }
+        .text-content p { margin: 0; font-weight: 600; font-size: 1rem; color: #fff; }
+        .text-content span { margin: 0; font-size: 0.85rem; color: #A7A7A7; }
+    </style>
+</head>
+<body>
+    
+    <div class="dynamic-island" id="dynamicIsland">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dynamicIsland = document.getElementById('dynamicIsland');
+            if (dynamicIsland) {
+                dynamicIsland.addEventListener('click', () => {
+                    dynamicIsland.classList.toggle('expanded');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

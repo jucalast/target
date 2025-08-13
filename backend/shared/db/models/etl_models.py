@@ -2,7 +2,7 @@
 Modelos SQLAlchemy para armazenamento de resultados do ETL.
 
 Este módulo define os modelos de banco de dados para armazenar os resultados
-do pipeline ETL no PostgreSQL.
+do pipeline ETL no banco de dados.
 """
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Union
@@ -11,7 +11,6 @@ from enum import Enum
 
 from sqlalchemy import Column, String, JSON, DateTime, Float, Integer, ForeignKey, Table, Text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
-from sqlalchemy import JSON
 from sqlalchemy.orm import relationship, declarative_base
 
 from shared.db.postgres import Base

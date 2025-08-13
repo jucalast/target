@@ -13,6 +13,9 @@ class User(Base):
     Attributes:
         id: Primary key
         email: User's email (unique, indexed)
+        name: User's full name
+        role: User's role in the system
+        avatar: URL to user's avatar image (optional)
         hashed_password: Hashed password (not plain text)
         created_at: Timestamp when the user was created
         analyses: Relationship to the Analysis model (one-to-many)
@@ -22,8 +25,13 @@ class User(Base):
     # Primary key
     id = Column(Integer, primary_key=True, index=True)
 
-    # User authentication
+    # User information
     email = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    role = Column(String, default="user", nullable=False)
+    avatar = Column(String, nullable=True)
+    
+    # User authentication
     hashed_password = Column(String, nullable=False)
     
     # Timestamps
